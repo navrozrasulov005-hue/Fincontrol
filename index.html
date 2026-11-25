@@ -1864,4 +1864,4 @@ async function saveCompany(){const v=$('c-name').value.trim();if(!v)return alert
 async function renameCompany(){const c=companies.find(x=>String(x.id)===String(cid));const v=prompt('Yangi nom:',c?c.name:'');if(!v||!v.trim())return;const e=(await sb.from('companies').update({name:v.trim()}).eq('id',cid)).error;if(e)return alert('Xatolik: '+e.message);loadCompanies(cid)}
 </script>
 </body>
-</html>a
+</html>
