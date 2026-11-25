@@ -84,23 +84,26 @@ body.light [style*="background:#1d2823"]{background:#e2e9e5!important;color:var(
   <aside class="md:w-64 md:min-h-screen p-4 flex flex-col justify-between" style="background:#0a0f0c;border-right:1px solid var(--line)">
     <div class="space-y-4">
       <div class="flex items-center justify-between gap-2">
-  <div><div class="font-semibold text-lg">FinControl</div><div class="mu text-xs">Boshqaruv hisobi</div></div>
-  <div class="flex items-center gap-1 p-1 rounded-lg" style="background:var(--panel);border:1px solid var(--line)">
-    <button type="button" id="th-light" onclick="setThemePref('light')" class="px-2 py-1 rounded text-xs mu" title="Oq rejim"><i class="fa-solid fa-sun"></i></button>
-    <button type="button" id="th-dark" onclick="setThemePref('dark')" class="px-2 py-1 rounded text-xs mu" title="Qora rejim"><i class="fa-solid fa-moon"></i></button>
-  </div>
-</div>
+        <div>
+          <div class="font-semibold text-lg">FinControl</div>
+          <div id="lbl-sub" style="font-size:12px;opacity:.65">Boshqaruv hisobi</div>
+        </div>
+        <div class="flex items-center gap-1 p-1 rounded-lg" style="background:var(--panel);border:1px solid var(--line)">
+          <button type="button" id="th-light" onclick="setThemePref('light')" class="px-2 py-1 rounded" style="font-size:12px;opacity:.75" title="Oq rejim"><i class="fa-solid fa-sun"></i></button>
+          <button type="button" id="th-dark" onclick="setThemePref('dark')" class="px-2 py-1 rounded" style="font-size:12px;opacity:.75" title="Qora rejim"><i class="fa-solid fa-moon"></i></button>
+        </div>
+      </div>
       <div>
-        <div class="mu text-xs mb-1">Kompaniya</div>
+        <div id="lbl-company" class="mu text-xs mb-1">Kompaniya</div>
         <div class="flex gap-2">
           <select id="company" class="inp" style="padding:7px 10px"></select>
           <button class="btn2" onclick="newCompany()" title="Yangi kompaniya">+</button>
           <button class="btn2" onclick="renameCompany()" title="Nomini o'zgartirish"><i class="fa-solid fa-pen"></i></button>
         </div>
-        <div class="mu text-xs mt-3 mb-1">Excel shabloni</div>
+        <div id="lbl-profile" class="mu text-xs mt-3 mb-1">Excel shabloni</div>
         <select id="profile" class="inp" style="padding:7px 10px" onchange="setProfile(this.value)"></select>
       </div>
-      <label class="btn w-full justify-center"><i class="fa-solid fa-file-excel"></i> Master Excel yuklash
+      <label class="btn w-full justify-center"><i class="fa-solid fa-file-excel"></i> <span id="lbl-upload">Master Excel yuklash</span>
         <input type="file" accept=".xlsx,.xls" class="hid" onchange="uploadMaster(event)"></label>
       <div id="file-status" class="mu text-xs -mt-2">Fayl yuklanmagan</div>
       <nav id="nav" class="space-y-1"></nav>
@@ -110,7 +113,6 @@ body.light [style*="background:#1d2823"]{background:#e2e9e5!important;color:var(
       <button onclick="sb.auth.signOut()" title="Chiqish" class="neg"><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
   </aside>
-
   <main class="flex-1 p-4 md:p-6 min-w-0 w-full">
     <div class="flex flex-wrap gap-3 items-center justify-between mb-5">
       <div><h2 id="title" class="text-xl font-semibold"></h2><div id="subtitle" class="mu text-sm"></div></div>
@@ -122,7 +124,6 @@ body.light [style*="background:#1d2823"]{background:#e2e9e5!important;color:var(
     <div id="view"></div>
   </main>
 </div>
-
 <!-- Modal -->
 <div id="modal" class="hid fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,.7)">
   <div class="panel p-6 w-full max-w-md space-y-3" id="modal-body"></div>
@@ -143,21 +144,49 @@ const BASE={
  pnl:{sheet:'P&L',skip:5,name:1,cols:[6,7,8,9,10,11,12,13,14,15],head:['Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek','Jami']},
  inv:{sheet:'Inventory',skip:5,sap:1,name:2,qty:5,p:6,su:8,sz:9,inq:10}
 };
-const PROFILES={golden_result:{label:'GR',map:BASE},rock_geo:{label:'RG',map:JSON.parse(JSON.stringify(BASE))}};
+const PROFILES={golden_result:{label:'GR (standart mapping)',map:BASE},rock_geo:{label:'RG (standart mapping — tekshirilmagan)',map:JSON.parse(JSON.stringify(BASE))}};
 
 const DTKT_GROUPS=['Реализация (mijozlar)','Поставщики местный','Поставщики импорт','Прочее','Intercompany','Налоги'];
 const TABS=[['dash','Boshqaruv paneli','chart-line'],['bs','Balans','scale-balanced'],['pnl','Foyda va zarar','file-invoice-dollar'],['cost','Tannarx','coins'],['sales','Sotuvlar','cart-shopping'],['dtkt','Qarzlar (DT-KT)','handshake-angle'],['ost','Bank va kassa','building-columns'],['inv','Ombor','boxes-stacked']];
 const M_FULL=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
 const M_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const $=id=>document.getElementById(id);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const n=v=>{const x=Number(String(v).replace(/\s/g,'').replace(',','.'));return isFinite(x)?x:0};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c]));
+// Sonlarni Excel/Google Sheets formatlaridan xavfsiz o'qish
+const n=v=>{
+ if(v===null||v===undefined||v==='')return 0;
+ if(typeof v==='number')return Number.isFinite(v)?v:0;
+ let s=String(v).trim();
+ if(!s||/^(—|–|-|n\/a|null)$/i.test(s))return 0;
+ let neg=false;
+ if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1)}
+ s=s.replace(/[\s\u00A0\u202F']/g,'').replace(/[^0-9,\.\-+]/g,'');
+ if(!s)return 0;
+ const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.');
+ if(comma>=0&&dot>=0){
+  const dec=comma>dot?',':'.';
+  s=s.replace(dec===','?/\./g:/,/g,'').replace(dec,'.');
+ }else if(comma>=0||dot>=0){
+  const sep=comma>=0?',':'.';
+  const parts=s.split(sep);
+  if(parts.length>2){
+   const tail=parts.pop();
+   s=parts.join('')+'.'+tail;
+  }else{
+   const tail=parts[1]||'';
+   if(tail.length===3&&parts[0].replace(/^[-+]/,'').length>0)s=parts.join('');
+   else s=parts[0]+'.'+tail;
+  }
+ }
+ const x=Number(s);
+ return Number.isFinite(x)?(neg?-Math.abs(x):x):0;
+};
 const fmt=v=>n(v).toLocaleString('ru-RU',{maximumFractionDigits:2});
 const sg=v=>`<span class="${n(v)<0?'neg':''}">${fmt(v)}</span>`;
 
 function parseYM(v,defY){
  const fbY=defY||2026;
- if(v instanceof Date&&!isNaN(v))return{y:v.getFullYear(),m:v.getMonth()+1,str:v.toISOString().slice(0,10).split('-').reverse().join('.')};
+ if(v instanceof Date&&!isNaN(v)){const y=v.getFullYear(),m=v.getMonth()+1,d=String(v.getDate()).padStart(2,'0');return{y,m,str:`${d}.${String(m).padStart(2,'0')}.${y}`}}
  if(typeof v==='number'&&v>20000&&v<100000){
   const d=new Date(Math.round((v-25569)*86400*1000));
   const y=d.getUTCFullYear(),m=d.getUTCMonth()+1,dd=String(d.getUTCDate()).padStart(2,'0'),mm=String(m).padStart(2,'0');
@@ -189,7 +218,7 @@ $('auth-form').onsubmit=async e=>{e.preventDefault();const m=$('auth-msg');m.cla
  else if(authMode==='signup'){m.textContent='Hisob yaratildi. Endi kiring.';m.className='p-3 rounded-lg text-sm pos';m.style.background='#12251a';$('auth-toggle').click()}};
 sb.auth.onAuthStateChange((_,s)=>{
  if(s){const isNew=!user||user.id!==s.user.id;user=s.user;$('user').textContent=user.email;$('auth').classList.add('hid');$('app').classList.remove('hid');if(isNew)init()}
- else{user=null;M=null;Object.keys(localStorage).filter(k=>k.startsWith('fc_master_')).forEach(k=>localStorage.removeItem(k));$('auth').classList.remove('hid');$('app').classList.add('hid')}});
+ else{user=null;M=null;tx=[];debts=[];cid=null;companies=[];$('auth').classList.remove('hid');$('app').classList.add('hid')}});
 
 // ============ BOSHLASH ============
 async function init(){
@@ -203,15 +232,17 @@ async function loadCompanies(keep){
  $('company').innerHTML=companies.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
  cid=keep&&companies.some(c=>String(c.id)===String(keep))?keep:(companies[0]&&companies[0].id);
  $('company').value=cid;$('company').onchange=e=>{cid=e.target.value;window.salesYear=window.salesMonth=window.salesFirma=window.salesKontr=null;window.dtktYear=window.dtktMonth=window.bsYear=window.bsMonth=window.costYear=window.costMonth=window.invYear=window.invMonth=null;window.dtktCats={};window.dtktClosed={};loadCompany()};
- loadCompany();
+ await loadCompany();
 }
 async function loadCompany(){
  $('profile').value=localStorage.getItem('fc_profile_'+cid)||'golden_result';
  const [a,b]=await Promise.all([sb.from('transactions').select('*').eq('company_id',cid).order('date',{ascending:false}),sb.from('counterparties_debt').select('*').eq('company_id',cid)]);
+ if(a.error||b.error){alert('Ma\'lumotlarni yuklashda xatolik: '+(a.error||b.error).message);return}
  tx=a.data||[];debts=b.data||[];
  M=null;$('file-status').textContent='Fayl yuklanmagan';
  try{const s=await sb.from('master_snapshots').select('data,file_name').eq('company_id',cid).order('created_at',{ascending:false}).limit(1);
-  if(s.data&&s.data[0]){M=s.data[0].data;$('file-status').textContent='Saqlangan: '+s.data[0].file_name}}catch(e){}
+  if(s.error)throw s.error;
+  if(s.data&&s.data[0]){M=s.data[0].data;$('file-status').textContent='Saqlangan: '+s.data[0].file_name}}catch(e){console.error('Master snapshot yuklanmadi:',e);$('file-status').textContent='Server ma’lumotini yuklashda xatolik';}
  if(!M){try{const l=localStorage.getItem('fc_master_'+cid);if(l){const o=JSON.parse(l);M=o.data;$('file-status').innerHTML='Saqlangan: '+esc(o.file)+(o.updatedAt?`<div class="text-[11px] pos mt-0.5">yangilangan ${esc(o.updatedAt)}</div>`:'')}}catch(e){}}
  go(tab);
 }
@@ -224,12 +255,11 @@ function go(t){tab=t;$('q').value='';
   :(localStorage.getItem('fc_lang')==='ru'?'Валюта: USD ($)':'Valyuta: USD ($)'));
  if($('q'))$('q').placeholder=tr('Qidirish...');
  document.querySelectorAll('.nav').forEach(b=>{const tObj=TABS.find(x=>x[0]===b.dataset.t);if(tObj)b.innerHTML=`<i class="fa-solid fa-${tObj[2]} w-5 text-center"></i>${esc(tr(tObj[1]))}`;});
- const compLbl=document.querySelector('aside .mu.text-xs');if(compLbl)compLbl.textContent=tr('Kompaniya');
- const profLbls=Array.from(document.querySelectorAll('aside .mu.text-xs'));
- if(profLbls[1])profLbls[1].textContent=tr('Excel shabloni');
- const upLbl=document.querySelector('aside label.btn');
- if(upLbl)upLbl.innerHTML=`<i class="fa-solid fa-file-excel"></i> ${esc(tr('Master Excel yuklash'))}<input type="file" accept=".xlsx,.xls" class="hid" onchange="uploadMaster(event)">`;
-mountTopPrefs();
+ // Yon paneldagi yozuvlar faqat id orqali tarjima qilinadi (quyosh/oy tugmalariga tegilmaydi)
+ [['lbl-sub','Boshqaruv hisobi'],['lbl-company','Kompaniya'],['lbl-profile','Excel shabloni'],['lbl-upload','Master Excel yuklash']]
+  .forEach(([id,txt])=>{const el=$(id);if(el)el.textContent=tr(txt);});
+ applyTheme();
+ mountTopPrefs();
  Object.values(charts).forEach(c=>c&&c.destroy());charts={};
  try{$('view').innerHTML=(R[t]||(()=>''))();if(t==='dash')drawCharts();}
  catch(err){console.error(err);$('view').innerHTML=`<div class="panel p-6 neg">Xatolik: ${esc(err.message)}. Master Excel faylini qayta yuklang.</div>`;}
@@ -440,7 +470,6 @@ function monthCal(selY,selM,years,onPick,extra){
 document.addEventListener('click',()=>document.querySelectorAll('.cal-pop').forEach(x=>x.classList.add('hid')));
 
 const LANG_MAP={
- // --- Boshqaruv paneli & filtrlar ---
  'Boshqaruv paneli':'Панель управления',
  'Boshqaruv hisobi':'Управленческий учет',
  'Kompaniya':'Компания',
@@ -477,15 +506,12 @@ const LANG_MAP={
  "Oylar bo'yicha dinamika":'Динамика по месяцам',
  "Yo'nalishlar / tarkib ulushi":'Доля направлений / структуры',
  'Tushum, yalpi foyda va sof foyda dinamikasi':'Динамика выручки, валовой и чистой прибыли',
- 'Yalpi foyda':'Валовая прибыль',
  'Tushum':'Выручка',
  'годовой итог':'Годовой итог',
  'ГОДОВОЙ ИТОГ':'ГОДОВОЙ ИТОГ',
  "oldingi oy ma'lumoti yo'q":'нет данных за прошлый месяц',
  "barcha yo'nalishlar":'все направления',
  'oy':'мес.',
-
- // --- Balans, P&L, Tannarx, Sotuvlar, Qarzlar, Ombor, Bank ---
  'Balans':'Баланс',
  'Foyda va zarar':'Отчет о прибылях и убытках',
  'Tannarx':'Себестоимость',
@@ -565,8 +591,6 @@ const LANG_MAP={
  'Summa (UZS)':'Сумма (UZS)',
  'Kirim':'Приход',
  "Pul qoldig'i":'Остаток средств',
- 'Tushum':'Выручка',
- 'Sof foyda':'Чистая прибыль',
  'Debitorlar':'Дебиторы',
  'Kreditorlar':'Кредиторы',
  'Sotuvlar dinamikasi':'Динамика продаж',
@@ -597,7 +621,6 @@ const _UZ_TO_RU=(()=>{
  Object.entries(LANG_MAP).forEach(([uz,ru])=>{
   if(uz&&ru&&uz!==ru&&!m[ru])m[ru]=uz;
  });
- // Qo'shimcha aniq o'zbekcha tarjimalar
  Object.assign(m,{
   'Панель управления':'Boshqaruv paneli',
   'Управленческий учет':'Boshqaruv hisobi',
@@ -655,7 +678,6 @@ function tr(s){
   });
   return out;
  }
- // lang === 'uz'
  if(_UZ_TO_RU[raw])return _UZ_TO_RU[raw];
  let out=raw
   .replace(/по сравнению с прошлым месяцем \(([^)]+)\)/gi,(_,p)=>`oldingi oyga nisbatan (${p})`)
@@ -749,16 +771,8 @@ function getSheetFxForYM(ym,basis){
     if(mo.last>0)return mo.last;
    }
   }
-  if(keys.length){
-   const lastMo=M.fx.months[keys[keys.length-1]];
-   if(lastMo.last>0)return lastMo.last;
-  }
  }
- if(M&&M.sales&&M.sales.items){
-  const r=M.sales.items.find(x=>x.rate>0);
-  if(r)return r.rate;
- }
- return 12030;
+ return 0;
 }
 function getFxRate(ym){
  const targetYM=ym||getActiveYM();
@@ -774,23 +788,28 @@ function fxSourceLabel(ym){
  if(b==='avg')return "Oy o'rtacha kursi (Курс listi)";
  return "Oy oxiri kursi (Курс listi)";
 }
-function curAmt(v,isUzs){
+function curAmt(v,isUzs,ym){
  const num=n(v);
  if(!num)return 0;
- if(getCurr()==='UZS')return isUzs?num:num*getFxRate(getActiveYM());
+ if(getCurr()==='UZS'){
+  if(isUzs)return num;
+  const rate=getFxRate(ym||getActiveYM());
+  return rate>0?num*rate:null;
+ }
  return num;
 }
-function fmtCur(v,withSign,isUzs){
- const num=curAmt(v,isUzs);
+function fmtCur(v,withSign,isUzs,ym){
+ const num=curAmt(v,isUzs,ym);
+ if(num===null)return '<span class="neg">Kurs topilmadi</span>';
  if(!num)return '—';
  const c=getCurr();
  const absStr=Math.abs(num).toLocaleString('ru-RU',{maximumFractionDigits:c==='UZS'?0:2});
  const sign=num<0?'-':(withSign&&num>0?'+':'');
  return c==='UZS'?`${sign}${absStr} so'm`:`${sign}$${absStr}`;
 }
-function sgCur(v,isUzs){
- const num=curAmt(v,isUzs);
- return `<span class="${num<0?'neg':''}">${fmtCur(v,false,isUzs)}</span>`;
+function sgCur(v,isUzs,ym){
+ const num=curAmt(v,isUzs,ym);
+ return num===null?fmtCur(v,false,isUzs,ym):`<span class="${num<0?'neg':''}">${fmtCur(v,false,isUzs,ym)}</span>`;
 }
 function openFxModal(){
  const ym=getActiveYM();
@@ -870,7 +889,7 @@ function topPrefsBar(){
   <span style="width:1px;height:16px;background:var(--line)"></span>
   <button type="button" onclick="openFxModal()" class="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5" style="background:${isMan?'rgba(212,166,58,.18)':'#101613'};color:${isMan?'var(--gold)':'var(--tx)'};border:1px solid ${isMan?'var(--gold)':'var(--line)'}" title="Kursni o'zgartirish yoki kunlik kurslarni ko'rish">
    <i class="fa-solid fa-coins" style="color:var(--gold)"></i>
-   <span>1$ = ${fmt(fx)}</span>
+   <span>1$ = ${fx>0?fmt(fx):'Kurs yo\'q'}</span>
    <i class="fa-solid fa-pen text-[10px] mu"></i>
   </button>
  </div>`;
@@ -931,7 +950,6 @@ dash(){
  const selIdx=(window.dashColIdx!=null&&mPool.includes(window.dashColIdx))?window.dashColIdx:defIdx;
  const selLabel=pnlHead[selIdx]||mNames[selIdx]||'Okt';
 
- // 4 ta sotuv yo'nalishi (dublikatsiz, aniq tartibda)
  const saleDirs=[
   {key:'Barchasi',label:'Barchasi',grp:null,srvRe:null},
   {key:'PREP-01',label:'Дробление',grp:'Дробление',srvRe:/^prep[-_]?0?1/i},
@@ -1693,7 +1711,9 @@ inv(){
   <td class="num">${fmt(eQ)}</td><td class="num">—</td><td class="num">${fmtCur(eS,false,true)}</td></tr>`;
  return nav+table(head,body+tot,'text-xs pnl-tbl inv-tbl');
 }
-};// ============ GRAFIKLAR ============
+};
+
+// ============ GRAFIKLAR ============
 function drawCharts(){
  Chart.defaults.color='#8a9a92';Chart.defaults.borderColor='#24302a';Chart.defaults.font.family="'IBM Plex Sans'";
  if(!M)return;
@@ -1812,7 +1832,19 @@ function drawCharts(){
 
 // ============ QIDIRUV VA EKSPORT ============
 function filterRows(){const q=$('q').value.toLowerCase();document.querySelectorAll('#tb tr').forEach(r=>r.classList.toggle('hid',q&&!r.textContent.toLowerCase().includes(q)))}
-function exportTab(){const t=document.querySelector('#view table');if(!t){alert("Bu bo'limda eksport qilinadigan jadval yo'q");return}XLSX.writeFile(XLSX.utils.table_to_book(t),'fincontrol_'+tab+'.xlsx')}
+function exportTab(){
+ const tables=[...document.querySelectorAll('#view table')].filter(t=>t.querySelector('tbody tr'));
+ if(!tables.length){alert("Bu bo'limda eksport qilinadigan jadval yo'q");return}
+ const wb=XLSX.utils.book_new();
+ tables.forEach((t,i)=>{
+  const ws=XLSX.utils.table_to_sheet(t,{raw:true});
+  let name=t.getAttribute('data-export-name')||`Jadval_${i+1}`;
+  name=String(name).replace(/[\\/?*\[\]:]/g,' ').slice(0,31)||`Jadval_${i+1}`;
+  if(wb.SheetNames.includes(name))name=`${name.slice(0,25)}_${i+1}`;
+  XLSX.utils.book_append_sheet(wb,ws,name);
+ });
+ XLSX.writeFile(wb,`fincontrol_${tab}.xlsx`);
+}
 
 // ============ MODALLAR VA BAZA ============
 function dtktDetail(idx){const d=M&&M.dtkt&&M.dtkt[idx];if(!d)return;const cols=(M.dtktCols&&M.dtktCols.length)?M.dtktCols:M.dtktMonths.map((l,i)=>({y:2026,m:i+1,label:l}));const dy=window.dtktYear!=null?window.dtktYear:(cols.length?cols[cols.length-1].y:2026);const yIdx=Array.from({length:12},(_,m0)=>cols.findIndex(c=>c.y===dy&&c.m===(m0+1)));const prevDec=cols.findIndex(c=>c.y===(dy-1)&&c.m===12);const getD=(arr,ci)=>ci>=0?(arr[ci]||0):0;const rows=M_FULL.map((m,i)=>{const ci=yIdx[i],pci=i>0?yIdx[i-1]:prevDec;const dv=getD(d.dt,ci),kv=getD(d.kt,ci),nv=dv-kv,pN=getD(d.dt,pci)-getD(d.kt,pci),chg=nv-pN;return `<tr><td>${m} ${dy}</td><td class="num pos">${dv?'$'+fmt(dv):'—'}</td><td class="num neg">${kv?'$'+fmt(kv):'—'}</td><td class="num font-semibold ${nv>0?'pos':nv<0?'neg':'mu'}">${nv?'$'+sg(nv):'—'}</td><td class="num text-xs ${chg>0?'pos':chg<0?'neg':'mu'}">${chg?(chg>0?'+':'')+'$'+fmt(chg):'—'}</td></tr>`}).join('');openModal(`<div class="flex items-center justify-between"><div><h3 class="font-semibold text-lg">${esc(tr(d.name))}</h3><div class="mu text-xs">SAP code: ${esc(d.sap)} • ${dy}-yil</div></div><button class="btn2" onclick="closeModal()">Yopish</button></div><div class="overflow-y-auto" style="max-height:60vh"><table class="w-full text-sm"><thead><tr><th>Oy</th><th class="num">Debitor (Дт)</th><th class="num">Kreditor (Кт)</th><th class="num">Sof qoldiq</th><th class="num">O'zgarish</th></tr></thead><tbody>${rows}</tbody></table></div>`);$('modal-body').style.maxWidth='680px'}
@@ -1826,10 +1858,10 @@ async function saveTx(){const e=(await sb.from('transactions').insert([{company_
 async function clearTx(){if(!confirm("Qo'lda kiritilgan barcha qoldiqlar o'chiriladi. Davom etasizmi?"))return;const e=(await sb.from('transactions').delete().eq('company_id',cid)).error;if(e)return alert('Xatolik: '+e.message);loadCompany()}
 function debtModal(){openModal(`<h3 class="font-semibold text-lg">Qarz qo'shish</h3>${f('d-name','Kontragent nomi')}${f('d-sap','SAP kod')}<select id="d-type" class="inp"><option value="DEBTOR">Debitor (bizga qarz)</option><option value="CREDITOR">Kreditor (bizning qarz)</option></select>${f('d-amt','Summa','number')}${f('d-due','','date')}${foot('saveDebt()')}`)}
 async function saveDebt(){if(!$('d-name').value)return alert('Kontragent nomini kiriting');const e=(await sb.from('counterparties_debt').insert([{company_id:cid,name:$('d-name').value,sap_code:$('d-sap').value,type:$('d-type').value,amount:n($('d-amt').value),due_date:$('d-due').value||null}])).error;if(e)return alert('Xatolik: '+e.message);closeModal();loadCompany()}
-async function delDebt(id){if(!confirm("Bu qarz o'chirilsinmi?"))return;await sb.from('counterparties_debt').delete().eq('id',id);loadCompany()}
+async function delDebt(id){if(!confirm("Bu qarz o'chirilsinmi?"))return;const {error}=await sb.from('counterparties_debt').delete().eq('id',id);if(error)return alert('Qarzni o\'chirishda xatolik: '+error.message);await loadCompany()}
 function newCompany(){openModal(`<h3 class="font-semibold text-lg">Yangi kompaniya</h3>${f('c-name','Kompaniya nomi')}${foot('saveCompany()')}`)}
 async function saveCompany(){const v=$('c-name').value.trim();if(!v)return alert('Nomni kiriting');const e=(await sb.from('companies').insert([{name:v,user_id:user.id}])).error;if(e)return alert('Xatolik: '+e.message);closeModal();loadCompanies(cid)}
 async function renameCompany(){const c=companies.find(x=>String(x.id)===String(cid));const v=prompt('Yangi nom:',c?c.name:'');if(!v||!v.trim())return;const e=(await sb.from('companies').update({name:v.trim()}).eq('id',cid)).error;if(e)return alert('Xatolik: '+e.message);loadCompanies(cid)}
 </script>
 </body>
-</html>
+</html>a
