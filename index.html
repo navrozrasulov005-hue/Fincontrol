@@ -6,13 +6,13 @@
 <title>FinControl — Laboratoriya moliyaviy ERP</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23141c18'/%3E%3Ctext x='50%25' y='56%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial,sans-serif' font-weight='bold' font-size='34' fill='%23d4a63a'%3EFC%3C/text%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d1210;--panel:#141c18;--line:#24302a;--tx:#e7ece9;--mu:#8a9a92;--gold:#d4a63a;--pos:#4ade80;--neg:#fb7185}
+:root{--bg:#0d1210;--panel:#141c18;--line:#24302a;--tx:#e7ece9;--mu:#8a9a92;--gold:#d4a63a;--pos:#4ade80;--neg:#fb7185;--tb:56px}
 body{font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px}
 .num{font-variant-numeric:tabular-nums;text-align:right}
@@ -33,7 +33,7 @@ tr:last-child td{border-bottom:0}
   aside{position:sticky;top:0;height:100vh;align-self:flex-start;overflow-y:auto}
 }
 main>div:first-child{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:12px;padding-bottom:12px;margin-top:-12px}
-.sub-bar{position:sticky;top:56px;z-index:15;background:var(--bg);padding:6px 0 10px;margin-top:-6px}
+.sub-bar{position:sticky;top:var(--tb,56px);z-index:15;background:var(--bg);padding:6px 0 10px;margin-top:-6px}
 .freeze th:nth-child(1),.freeze tr:not(.sub) td:nth-child(1){position:sticky;left:0;min-width:190px;width:190px;background:var(--panel);z-index:2}
 .freeze th:nth-child(2),.freeze tr:not(.sub) td:nth-child(2){position:sticky;left:190px;min-width:190px;width:190px;background:var(--panel);z-index:2;border-right:1px solid var(--line)}
 .freeze tr.sub td:first-child{position:sticky;left:0;background:#101813;z-index:2;border-right:1px solid var(--line)}
@@ -59,8 +59,8 @@ body.light .sub td,body.light .freeze tr.sub td:first-child{background:#eef3f0!i
 body.light .pnl-tbl th,body.light .pnl-tbl td{border-left:1px solid rgba(0,0,0,.07)}
 body.light .pnl-tbl tbody tr:hover td{background:rgba(0,0,0,.04)}
 body.light .pnl-tbl thead th:last-child{background:#f3eedb}
-body.light [style*="background:#101613"],body.light [style*="background:#101813"],body.light [style*="background:#141c18"]{background:#f1f5f3!important;color:var(--tx)!important}
-body.light [style*="background:#162019"]{background:#e6ede9!important}
+body.light [style*="background:#101613"],body.light [style*="background:#101813"],body.light [style*="background:#141c18"],body.light [style*="background:#0e1612"]{background:#f1f5f3!important;color:var(--tx)!important}
+body.light [style*="background:#162019"],body.light [style*="background:#1b1a12"]{background:#e6ede9!important}
 body.light [style*="background:#13261b"]{background:#dcfce7!important}
 body.light [style*="background:#1d2823"]{background:#e2e9e5!important;color:var(--tx)!important}
 </style>
@@ -84,39 +84,37 @@ body.light [style*="background:#1d2823"]{background:#e2e9e5!important;color:var(
   <aside class="md:w-64 md:min-h-screen p-4 flex flex-col justify-between" style="background:#0a0f0c;border-right:1px solid var(--line)">
     <div class="space-y-4">
       <div class="flex items-center justify-between gap-2">
-        <div>
-          <div class="font-semibold text-lg">FinControl</div>
-          <div id="lbl-sub" style="font-size:12px;opacity:.65">Boshqaruv hisobi</div>
-        </div>
-        <div class="flex items-center gap-1 p-1 rounded-lg" style="background:var(--panel);border:1px solid var(--line)">
-          <button type="button" id="th-light" onclick="setThemePref('light')" class="px-2 py-1 rounded" style="font-size:12px;opacity:.75" title="Oq rejim"><i class="fa-solid fa-sun"></i></button>
-          <button type="button" id="th-dark" onclick="setThemePref('dark')" class="px-2 py-1 rounded" style="font-size:12px;opacity:.75" title="Qora rejim"><i class="fa-solid fa-moon"></i></button>
-        </div>
-      </div>
+  <div><div class="font-semibold text-lg">FinControl</div><div id="lbl-sub" class="mu text-xs">Boshqaruv hisobi</div></div>
+  <div class="flex items-center gap-1 p-1 rounded-lg" style="background:var(--panel);border:1px solid var(--line)">
+    <button type="button" id="th-light" onclick="setThemePref('light')" class="px-2 py-1 rounded text-xs mu" title="Oq rejim" aria-label="Oq rejim"><i class="fa-solid fa-sun"></i></button>
+    <button type="button" id="th-dark" onclick="setThemePref('dark')" class="px-2 py-1 rounded text-xs mu" title="Qora rejim" aria-label="Qora rejim"><i class="fa-solid fa-moon"></i></button>
+  </div>
+</div>
       <div>
         <div id="lbl-company" class="mu text-xs mb-1">Kompaniya</div>
         <div class="flex gap-2">
           <select id="company" class="inp" style="padding:7px 10px"></select>
-          <button class="btn2" onclick="newCompany()" title="Yangi kompaniya">+</button>
-          <button class="btn2" onclick="renameCompany()" title="Nomini o'zgartirish"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn2" onclick="newCompany()" title="Yangi kompaniya" aria-label="Yangi kompaniya">+</button>
+          <button class="btn2" onclick="renameCompany()" title="Nomini o'zgartirish" aria-label="Nomini o'zgartirish"><i class="fa-solid fa-pen"></i></button>
         </div>
         <div id="lbl-profile" class="mu text-xs mt-3 mb-1">Excel shabloni</div>
         <select id="profile" class="inp" style="padding:7px 10px" onchange="setProfile(this.value)"></select>
       </div>
-      <label class="btn w-full justify-center"><i class="fa-solid fa-file-excel"></i> <span id="lbl-upload">Master Excel yuklash</span>
+      <label id="upload-lbl" class="btn w-full justify-center"><i class="fa-solid fa-file-excel"></i> Master Excel yuklash
         <input type="file" accept=".xlsx,.xls" class="hid" onchange="uploadMaster(event)"></label>
       <div id="file-status" class="mu text-xs -mt-2">Fayl yuklanmagan</div>
       <nav id="nav" class="space-y-1"></nav>
     </div>
     <div class="flex items-center justify-between text-xs mu pt-4 mt-4" style="border-top:1px solid var(--line)">
       <span id="user" class="truncate"></span>
-      <button onclick="sb.auth.signOut()" title="Chiqish" class="neg"><i class="fa-solid fa-right-from-bracket"></i></button>
+      <button onclick="sb&&sb.auth.signOut()" title="Chiqish" aria-label="Chiqish" class="neg"><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
   </aside>
+
   <main class="flex-1 p-4 md:p-6 min-w-0 w-full">
     <div class="flex flex-wrap gap-3 items-center justify-between mb-5">
       <div><h2 id="title" class="text-xl font-semibold"></h2><div id="subtitle" class="mu text-sm"></div></div>
-      <div class="flex gap-2 items-center">
+      <div id="toolbar-right" class="flex flex-wrap gap-2 items-center">
         <input id="q" oninput="filterRows()" placeholder="Qidirish..." class="inp" style="width:200px">
         <button class="btn2" onclick="exportTab()"><i class="fa-solid fa-download mr-1"></i> Excel</button>
       </div>
@@ -124,16 +122,32 @@ body.light [style*="background:#1d2823"]{background:#e2e9e5!important;color:var(
     <div id="view"></div>
   </main>
 </div>
+
 <!-- Modal -->
-<div id="modal" class="hid fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,.7)">
+<div id="modal" class="hid fixed inset-0 z-[100] flex items-center justify-center p-4" style="background:rgba(0,0,0,.7)" role="dialog" aria-modal="true">
   <div class="panel p-6 w-full max-w-md space-y-3" id="modal-body"></div>
 </div>
 
 <script>
 // ============ SOZLAMALAR ============
+// Brauzer xotirasi bloklangan bo'lsa (preview/iframe/maxfiy rejim) xotiraga o'tadi — dastur qulamaydi
+const LS=(()=>{const mem={};let ok=true;try{window.localStorage.setItem('__fc','1');window.localStorage.removeItem('__fc')}catch(e){ok=false}
+ return{
+  getItem:k=>{try{if(ok)return window.localStorage.getItem(k)}catch(e){}return Object.prototype.hasOwnProperty.call(mem,k)?mem[k]:null},
+  setItem:(k,v)=>{try{if(ok){window.localStorage.setItem(k,v);return}}catch(e){}mem[k]=String(v)},
+  removeItem:k=>{try{if(ok)window.localStorage.removeItem(k)}catch(e){}delete mem[k]},
+  keys:()=>{try{if(ok)return Object.keys(window.localStorage)}catch(e){}return Object.keys(mem)}
+ }})();
+function showAuthErr(t){const m=document.getElementById('auth-msg');if(!m)return;m.textContent=t;m.className='p-3 rounded-lg text-sm neg';m.style.background='#2a1519'}
+window.addEventListener('error',e=>{const a=document.getElementById('auth');if(a&&!a.classList.contains('hid'))showAuthErr('Xatolik: '+(e.message||'noma\'lum'))});
+window.addEventListener('unhandledrejection',e=>{const a=document.getElementById('auth');if(a&&!a.classList.contains('hid'))showAuthErr('Xatolik: '+((e.reason&&e.reason.message)||e.reason||'noma\'lum'))});
 const SUPA_URL='https://yfoferqplbqukoprrnki.supabase.co';
 const SUPA_KEY='sb_publishable_boMWNR0vgHqpFUx1a6W1Nw_jlwTxVWF';
-const sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+let sb=null;
+try{
+ if(!window.supabase)throw new Error("Supabase kutubxonasi yuklanmadi. Internetni tekshiring yoki cdn.jsdelivr.net ochilishini tekshiring.");
+ sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{storage:{getItem:k=>LS.getItem(k),setItem:(k,v)=>LS.setItem(k,v),removeItem:k=>LS.removeItem(k)}}});
+}catch(e){console.error(e);setTimeout(()=>showAuthErr(e.message),0)}
 
 const BASE={
  ost:{sheet:'Остатки',skip:4,to:13,bank:1,acc:2,mStart:3,months:['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek']},
@@ -144,8 +158,7 @@ const BASE={
  pnl:{sheet:'P&L',skip:5,name:1,cols:[6,7,8,9,10,11,12,13,14,15],head:['Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek','Jami']},
  inv:{sheet:'Inventory',skip:5,sap:1,name:2,qty:5,p:6,su:8,sz:9,inq:10}
 };
-// DIQQAT: GR va RG uchun mustaqil ustun xaritalari berilmagan. Hozircha ikkisi ham BASE shablonidan foydalanadi.
-const PROFILES={golden_result:{label:'GR (standart mapping)',map:BASE},rock_geo:{label:'RG (standart mapping — tekshirilmagan)',map:JSON.parse(JSON.stringify(BASE))}};
+const PROFILES={golden_result:{label:'GR',map:BASE},rock_geo:{label:'RG',map:JSON.parse(JSON.stringify(BASE))}};
 
 const DTKT_GROUPS=['Реализация (mijozlar)','Поставщики местный','Поставщики импорт','Прочее','Intercompany','Налоги'];
 const TABS=[['dash','Boshqaruv paneli','chart-line'],['bs','Balans','scale-balanced'],['pnl','Foyda va zarar','file-invoice-dollar'],['cost','Tannarx','coins'],['sales','Sotuvlar','cart-shopping'],['dtkt','Qarzlar (DT-KT)','handshake-angle'],['ost','Bank va kassa','building-columns'],['inv','Ombor','boxes-stacked']];
@@ -153,42 +166,17 @@ const M_FULL=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sen
 const M_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-// Sonlarni Excel/Google Sheets formatlaridan xavfsiz o'qish:
-// 1 234,56 | 1.234,56 | 1,234.56 | 1234.56 | (1 234,56)
-const n=v=>{
- if(v===null||v===undefined||v==='')return 0;
- if(typeof v==='number')return Number.isFinite(v)?v:0;
- let s=String(v).trim();
- if(!s||/^(—|–|-|n\/a|null)$/i.test(s))return 0;
- let neg=false;
- if(/^\(.*\)$/.test(s)){neg=true;s=s.slice(1,-1)}
- s=s.replace(/[\s\u00A0\u202F']/g,'').replace(/[^0-9,\.\-+]/g,'');
- if(!s)return 0;
- const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.');
- if(comma>=0&&dot>=0){
-  const dec=comma>dot?',':'.';
-  s=s.replace(dec===' '?/x^/:dec===','?/\./g:/,/g,'').replace(dec===' '?/x^/:dec===','?',':'.');
- }else if(comma>=0||dot>=0){
-  const sep=comma>=0?',':'.';
-  const parts=s.split(sep);
-  if(parts.length>2){
-   const tail=parts.pop();
-   s=parts.join('')+'.'+tail;
-  }else{
-   const tail=parts[1]||'';
-   if(tail.length===3&&parts[0].replace(/^[-+]/,'').length>0)s=parts.join('');
-   else s=parts[0]+'.'+tail;
-  }
- }
- const x=Number(s);
- return Number.isFinite(x)?(neg?-Math.abs(x):x):0;
-};
+// Raqamni xavfsiz o'qish: "1 234,56", "1,234.56", "1234.56" formatlarini qo'llaydi
+const n=v=>{let s=String(v??'').replace(/[\s\u00a0]/g,'');if(s.includes(',')&&s.includes('.'))s=s.replace(/,/g,'');else s=s.replace(',','.');const x=Number(s);return isFinite(x)?x:0};
 const fmt=v=>n(v).toLocaleString('ru-RU',{maximumFractionDigits:2});
 const sg=v=>`<span class="${n(v)<0?'neg':''}">${fmt(v)}</span>`;
 
 function parseYM(v,defY){
  const fbY=defY||2026;
- if(v instanceof Date&&!isNaN(v)){const y=v.getFullYear(),m=v.getMonth()+1,d=String(v.getDate()).padStart(2,'0');return{y,m,str:`${d}.${String(m).padStart(2,'0')}.${y}`}}
+ if(v instanceof Date&&!isNaN(v)){
+  const y=v.getFullYear(),m=v.getMonth()+1,d=v.getDate();
+  return{y,m,str:`${String(d).padStart(2,'0')}.${String(m).padStart(2,'0')}.${y}`};
+ }
  if(typeof v==='number'&&v>20000&&v<100000){
   const d=new Date(Math.round((v-25569)*86400*1000));
   const y=d.getUTCFullYear(),m=d.getUTCMonth()+1,dd=String(d.getUTCDate()).padStart(2,'0'),mm=String(m).padStart(2,'0');
@@ -209,59 +197,90 @@ function parseYM(v,defY){
 }
 const xlDate=v=>parseYM(v).str;
 
-let user=null,cid=null,companies=[],tab='dash',M=null,tx=[],debts=[],charts={},authMode='login';
+let user=null,cid=null,companies=[],tab='dash',M=null,tx=[],debts=[],charts={},authMode='login',loadTok=0,creatingDefault=false;
 
 // ============ KIRISH ============
-$('auth-toggle').onclick=()=>{authMode=authMode==='login'?'signup':'login';$('auth-btn').textContent=authMode==='login'?'Kirish':"Ro'yxatdan o'tish";$('auth-toggle').textContent=authMode==='login'?"Hisobingiz yo'qmi? Ro'yxatdan o'ting":'Hisobingiz bormi? Kiring'};
-$('auth-form').onsubmit=async e=>{e.preventDefault();const m=$('auth-msg');m.className='hid';
- const a={email:$('auth-email').value,password:$('auth-pass').value};
- const r=authMode==='login'?await sb.auth.signInWithPassword(a):await sb.auth.signUp(a);
- if(r.error){m.textContent='Xatolik: '+r.error.message;m.className='p-3 rounded-lg text-sm neg';m.style.background='#2a1519'}
- else if(authMode==='signup'){m.textContent='Hisob yaratildi. Endi kiring.';m.className='p-3 rounded-lg text-sm pos';m.style.background='#12251a';$('auth-toggle').click()}};
-sb.auth.onAuthStateChange((_,s)=>{
- if(s){const isNew=!user||user.id!==s.user.id;user=s.user;$('user').textContent=user.email;$('auth').classList.add('hid');$('app').classList.remove('hid');if(isNew)init()}
- else{user=null;M=null;tx=[];debts=[];cid=null;companies=[];$('auth').classList.remove('hid');$('app').classList.add('hid')}});
+$('auth-toggle').onclick=()=>{authMode=authMode==='login'?'signup':'login';$('auth-btn').textContent=authMode==='login'?'Kirish':"Ro'yxatdan o'tish";$('auth-toggle').textContent=authMode==='login'?"Hisobingiz yo'qmi? Ro'yxatdan o'ting":'Hisobingiz bormi? Kiring';$('auth-pass').autocomplete=authMode==='login'?'current-password':'new-password'};
+$('auth-form').onsubmit=async e=>{
+ e.preventDefault();const m=$('auth-msg');m.className='hid';
+ if(!sb){showAuthErr("Server bilan ulanish yo'q: Supabase yuklanmadi. Internetni tekshirib, sahifani yangilang.");return}
+ const btn=$('auth-btn');btn.disabled=true;
+ try{
+  const a={email:$('auth-email').value.trim(),password:$('auth-pass').value};
+  const r=authMode==='login'?await sb.auth.signInWithPassword(a):await sb.auth.signUp(a);
+  if(r.error){showAuthErr('Xatolik: '+r.error.message)}
+  else if(authMode==='signup'){
+   if(r.data&&r.data.session){handleSession(r.data.session)}
+   else{m.textContent="Hisob yaratildi. Agar email tasdiqlash talab qilinsa, pochtangizni tekshiring, so'ng kiring.";m.className='p-3 rounded-lg text-sm pos';m.style.background='#12251a';$('auth-toggle').click()}
+  }
+  else if(r.data&&r.data.session){handleSession(r.data.session)}
+ }catch(err){console.error(err);showAuthErr('Xatolik: '+(err.message||err))}
+ finally{btn.disabled=false}
+};
+function handleSession(s){
+ if(s){const isNew=!user||user.id!==s.user.id;user=s.user;$('user').textContent=user.email;$('auth').classList.add('hid');$('app').classList.remove('hid');
+  // Supabase callback ichida to'g'ridan-to'g'ri so'rov yuborish deadlock berishi mumkin — shuning uchun setTimeout
+  if(isNew)setTimeout(()=>init().catch(err=>{console.error(err);alert('Yuklashda xatolik: '+(err.message||err))}),0)}
+ else{user=null;M=null;LS.keys().filter(k=>k.startsWith('fc_master_')).forEach(k=>LS.removeItem(k));$('auth').classList.remove('hid');$('app').classList.add('hid')}
+}
+if(sb)sb.auth.onAuthStateChange((_,s)=>handleSession(s));
 
 // ============ BOSHLASH ============
 async function init(){
- $('nav').innerHTML=TABS.map(t=>`<button class="nav" data-t="${t[0]}" onclick="go('${t[0]}')"><i class="fa-solid fa-${t[2]} w-5 text-center"></i>${t[1]}</button>`).join('');
+ $('nav').innerHTML=TABS.map(t=>`<button type="button" class="nav" data-t="${t[0]}" onclick="go('${t[0]}')"><i class="fa-solid fa-${t[2]} w-5 text-center"></i>${t[1]}</button>`).join('');
  $('profile').innerHTML=Object.entries(PROFILES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
  await loadCompanies();
 }
+function resetViewState(){
+ window.salesYear=window.salesMonth=window.salesFirma=window.salesKontr=null;
+ window.dtktYear=window.dtktMonth=window.bsYear=window.bsMonth=window.costYear=window.costMonth=window.invYear=window.invMonth=null;
+ window.dashColIdx=null;window.dashDir=null;window.dashMetric=null;window.pnlMonth=null;window.pnlMode=null;
+ window.dtktCats={};window.dtktClosed={};
+}
 async function loadCompanies(keep){
  let r=await sb.from('companies').select('*');if(r.error){alert('Xatolik: '+r.error.message);return}companies=r.data||[];
- if(!companies.length){const c=await sb.from('companies').insert([{name:'Asosiy kompaniya MChJ',user_id:user.id}]).select();companies=c.data||[]}
+ if(!companies.length&&!creatingDefault){
+  creatingDefault=true;
+  try{const c=await sb.from('companies').insert([{name:'Asosiy kompaniya MChJ',user_id:user.id}]).select();companies=c.data||[]}
+  finally{creatingDefault=false}
+ }
  $('company').innerHTML=companies.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
  cid=keep&&companies.some(c=>String(c.id)===String(keep))?keep:(companies[0]&&companies[0].id);
- $('company').value=cid;$('company').onchange=e=>{cid=e.target.value;window.salesYear=window.salesMonth=window.salesFirma=window.salesKontr=null;window.dtktYear=window.dtktMonth=window.bsYear=window.bsMonth=window.costYear=window.costMonth=window.invYear=window.invMonth=null;window.dtktCats={};window.dtktClosed={};loadCompany()};
- await loadCompany();
+ if(cid!=null)$('company').value=cid;
+ $('company').onchange=e=>{cid=e.target.value;resetViewState();loadCompany()};
+ loadCompany();
 }
 async function loadCompany(){
- $('profile').value=localStorage.getItem('fc_profile_'+cid)||'golden_result';
- const [a,b]=await Promise.all([sb.from('transactions').select('*').eq('company_id',cid).order('date',{ascending:false}),sb.from('counterparties_debt').select('*').eq('company_id',cid)]);
- if(a.error||b.error){alert('Ma\'lumotlarni yuklashda xatolik: '+(a.error||b.error).message);return}
+ const tok=++loadTok;
+ const myCid=cid;
+ if(myCid==null){return}
+ $('profile').value=LS.getItem('fc_profile_'+myCid)||'golden_result';
+ const [a,b]=await Promise.all([sb.from('transactions').select('*').eq('company_id',myCid).order('date',{ascending:false}),sb.from('counterparties_debt').select('*').eq('company_id',myCid)]);
+ if(tok!==loadTok)return;
  tx=a.data||[];debts=b.data||[];
- M=null;$('file-status').textContent='Fayl yuklanmagan';
- try{const s=await sb.from('master_snapshots').select('data,file_name').eq('company_id',cid).order('created_at',{ascending:false}).limit(1);
-  if(s.error)throw s.error;
-  if(s.data&&s.data[0]){M=s.data[0].data;$('file-status').textContent='Saqlangan: '+s.data[0].file_name}}catch(e){console.error('Master snapshot yuklanmadi:',e);$('file-status').textContent='Server ma’lumotini yuklashda xatolik';}
- if(!M){try{const l=localStorage.getItem('fc_master_'+cid);if(l){const o=JSON.parse(l);M=o.data;$('file-status').innerHTML='Saqlangan: '+esc(o.file)+(o.updatedAt?`<div class="text-[11px] pos mt-0.5">yangilangan ${esc(o.updatedAt)}</div>`:'')}}catch(e){}}
+ M=null;$('file-status').textContent=tr('Fayl yuklanmagan');
+ try{const s=await sb.from('master_snapshots').select('data,file_name').eq('company_id',myCid).order('created_at',{ascending:false}).limit(1);
+  if(tok!==loadTok)return;
+  if(s.data&&s.data[0]){M=s.data[0].data;$('file-status').textContent='Saqlangan: '+s.data[0].file_name}}catch(e){}
+ if(!M){try{const l=LS.getItem('fc_master_'+myCid);if(l){const o=JSON.parse(l);M=o.data;$('file-status').innerHTML='Saqlangan: '+esc(o.file)+(o.updatedAt?`<div class="text-[11px] pos mt-0.5">yangilangan ${esc(o.updatedAt)}</div>`:'')}}catch(e){}}
  go(tab);
 }
-function setProfile(v){localStorage.setItem('fc_profile_'+cid,v)}
+function setProfile(v){LS.setItem('fc_profile_'+cid,v)}
 function go(t){tab=t;$('q').value='';
  document.querySelectorAll('.nav').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
  const T=TABS.find(x=>x[0]===t)||TABS[0];$('title').textContent=tr(T[1]);
  $('subtitle').textContent=(getCurr()==='UZS'
-  ?(localStorage.getItem('fc_lang')==='ru'?'Валюта: UZS (1$ = '+fmt(getFxRate(getActiveYM()))+' сум)':'Valyuta: UZS (1$ = '+fmt(getFxRate(getActiveYM()))+' so\'m)')
-  :(localStorage.getItem('fc_lang')==='ru'?'Валюта: USD ($)':'Valyuta: USD ($)'));
+  ?(LS.getItem('fc_lang')==='ru'?'Валюта: UZS (1$ = '+fmt(getFxRate(getActiveYM()))+' сум)':'Valyuta: UZS (1$ = '+fmt(getFxRate(getActiveYM()))+' so\'m)')
+  :(LS.getItem('fc_lang')==='ru'?'Валюта: USD ($)':'Valyuta: USD ($)'));
  if($('q'))$('q').placeholder=tr('Qidirish...');
  document.querySelectorAll('.nav').forEach(b=>{const tObj=TABS.find(x=>x[0]===b.dataset.t);if(tObj)b.innerHTML=`<i class="fa-solid fa-${tObj[2]} w-5 text-center"></i>${esc(tr(tObj[1]))}`;});
- // Yon paneldagi yozuvlar faqat id orqali tarjima qilinadi (quyosh/oy tugmalariga tegilmaydi)
- [['lbl-sub','Boshqaruv hisobi'],['lbl-company','Kompaniya'],['lbl-profile','Excel shabloni'],['lbl-upload','Master Excel yuklash']]
-  .forEach(([id,txt])=>{const el=$(id);if(el)el.textContent=tr(txt);});
- applyTheme();
-mountTopPrefs();
+ // Yon paneldagi yorliqlar (endi aniq id orqali — oldingi versiyada noto'g'ri elementlarni almashtirib yuborardi)
+ if($('lbl-sub'))$('lbl-sub').textContent=tr('Boshqaruv hisobi');
+ if($('lbl-company'))$('lbl-company').textContent=tr('Kompaniya');
+ if($('lbl-profile'))$('lbl-profile').textContent=tr('Excel shabloni');
+ const upLbl=$('upload-lbl');
+ if(upLbl)upLbl.innerHTML=`<i class="fa-solid fa-file-excel"></i> ${esc(tr('Master Excel yuklash'))}<input type="file" accept=".xlsx,.xls" class="hid" onchange="uploadMaster(event)">`;
+ mountTopPrefs();
  Object.values(charts).forEach(c=>c&&c.destroy());charts={};
  try{$('view').innerHTML=(R[t]||(()=>''))();if(t==='dash')drawCharts();}
  catch(err){console.error(err);$('view').innerHTML=`<div class="panel p-6 neg">Xatolik: ${esc(err.message)}. Master Excel faylini qayta yuklang.</div>`;}
@@ -407,14 +426,14 @@ function parseMaster(wb,map){
  return {data:out,rep,chk};
 }
 async function uploadMaster(ev){
- const f=ev.target.files[0];if(!f)return;
- const buf=await f.arrayBuffer();
+ const inp=ev.target,f=inp.files[0];if(!f)return;
  try{
+  const buf=await f.arrayBuffer();
   const wb=XLSX.read(new Uint8Array(buf),{type:'array'});
   const res=parseMaster(wb,PROFILES[$('profile').value].map);
   showReport(res,f.name,()=>commit(res.data,f.name));
  }catch(e){alert("Excel o'qishda xatolik: "+e.message)}
- ev.target.value='';
+ inp.value='';
 }
 function showReport(res,file,ok){
  const bad=res.rep.some(r=>!r.found||!r.count);
@@ -433,10 +452,11 @@ function nowStamp(){
 }
 async function commit(data,file){
  const updatedAt=nowStamp();
+ const myCid=cid;
  M=data;
  $('file-status').innerHTML=`Saqlangan: ${esc(file)}<div class="text-[11px] pos mt-0.5">yangilangan ${updatedAt}</div>`;
- try{localStorage.setItem('fc_master_'+cid,JSON.stringify({file,data,updatedAt}))}catch(e){}
- {const {error}=await sb.from('master_snapshots').insert([{company_id:cid,file_name:file,data}]);if(error){$('file-status').textContent='Faqat shu brauzerda saqlandi (server xatosi)';alert('Serverga saqlanmadi: '+error.message)}}
+ try{LS.setItem('fc_master_'+myCid,JSON.stringify({file,data,updatedAt}))}catch(e){}
+ {const {error}=await sb.from('master_snapshots').insert([{company_id:myCid,file_name:file,data}]);if(error){$('file-status').textContent='Faqat shu brauzerda saqlandi (server xatosi)';alert('Serverga saqlanmadi: '+error.message)}}
  go(tab);
 }
 
@@ -472,7 +492,6 @@ function monthCal(selY,selM,years,onPick,extra){
 document.addEventListener('click',()=>document.querySelectorAll('.cal-pop').forEach(x=>x.classList.add('hid')));
 
 const LANG_MAP={
- // --- Boshqaruv paneli & filtrlar ---
  'Boshqaruv paneli':'Панель управления',
  'Boshqaruv hisobi':'Управленческий учет',
  'Kompaniya':'Компания',
@@ -509,15 +528,12 @@ const LANG_MAP={
  "Oylar bo'yicha dinamika":'Динамика по месяцам',
  "Yo'nalishlar / tarkib ulushi":'Доля направлений / структуры',
  'Tushum, yalpi foyda va sof foyda dinamikasi':'Динамика выручки, валовой и чистой прибыли',
- 'Yalpi foyda':'Валовая прибыль',
  'Tushum':'Выручка',
  'годовой итог':'Годовой итог',
  'ГОДОВОЙ ИТОГ':'ГОДОВОЙ ИТОГ',
  "oldingi oy ma'lumoti yo'q":'нет данных за прошлый месяц',
  "barcha yo'nalishlar":'все направления',
  'oy':'мес.',
-
- // --- Balans, P&L, Tannarx, Sotuvlar, Qarzlar, Ombor, Bank ---
  'Balans':'Баланс',
  'Foyda va zarar':'Отчет о прибылях и убытках',
  'Tannarx':'Себестоимость',
@@ -597,8 +613,6 @@ const LANG_MAP={
  'Summa (UZS)':'Сумма (UZS)',
  'Kirim':'Приход',
  "Pul qoldig'i":'Остаток средств',
- 'Tushum':'Выручка',
- 'Sof foyda':'Чистая прибыль',
  'Debitorlar':'Дебиторы',
  'Kreditorlar':'Кредиторы',
  'Sotuvlar dinamikasi':'Динамика продаж',
@@ -629,7 +643,6 @@ const _UZ_TO_RU=(()=>{
  Object.entries(LANG_MAP).forEach(([uz,ru])=>{
   if(uz&&ru&&uz!==ru&&!m[ru])m[ru]=uz;
  });
- // Qo'shimcha aniq o'zbekcha tarjimalar
  Object.assign(m,{
   'Панель управления':'Boshqaruv paneli',
   'Управленческий учет':'Boshqaruv hisobi',
@@ -668,7 +681,7 @@ const _UZ_TO_RU=(()=>{
 function tr(s){
  const raw=String(s??'');
  if(!raw)return raw;
- const lang=localStorage.getItem('fc_lang')||'uz';
+ const lang=LS.getItem('fc_lang')||'uz';
  if(lang==='ru'){
   if(LANG_MAP[raw])return LANG_MAP[raw];
   let out=raw
@@ -681,13 +694,12 @@ function tr(s){
    .replace(/sof foyda \/ jami daromad/gi,'чистая прибыль / выручка')
    .replace(/o'rtacha sotuv narxi/gi,'средняя цена продажи')
    .replace(/dona boshiga tannarx/gi,'затраты на единицу')
-   .replace(/(\d+)\s*oy/gi,(_,n)=>`${n} мес.`);
+   .replace(/(\d+)\s*oy\b/gi,(_,n)=>`${n} мес.`);
   Object.entries(LANG_MAP).forEach(([uz,ru])=>{
    if(uz.length>=3&&out.includes(uz))out=out.split(uz).join(ru);
   });
   return out;
  }
- // lang === 'uz'
  if(_UZ_TO_RU[raw])return _UZ_TO_RU[raw];
  let out=raw
   .replace(/по сравнению с прошлым месяцем \(([^)]+)\)/gi,(_,p)=>`oldingi oyga nisbatan (${p})`)
@@ -708,9 +720,9 @@ function tr(s){
  .replace(/Прочие/g,'Boshqa')
  .replace(/Налоги/g,'Soliqlar');
 }
-function getCurr(){return localStorage.getItem('fc_curr')||'USD';}
-function getFxBasis(){return localStorage.getItem('fc_fx_basis')||'end';}
-function setFxBasis(b){localStorage.setItem('fc_fx_basis',b);if($('app')&&!$('app').classList.contains('hid'))go(tab);}
+function getCurr(){return LS.getItem('fc_curr')||'USD';}
+function getFxBasis(){return LS.getItem('fc_fx_basis')||'end';}
+function setFxBasis(b){LS.setItem('fc_fx_basis',b);if($('app')&&!$('app').classList.contains('hid'))go(tab);}
 function getActiveYM(){
  if(tab==='dtkt'){
   const cols=(M&&M.dtktCols&&M.dtktCols.length)?M.dtktCols:[];
@@ -743,7 +755,7 @@ function getActiveYM(){
 }
 function getManualFx(ym){
  const k=ym||'default';
- const v=localStorage.getItem('fc_fx_man_'+(cid||'g')+'_'+k)||localStorage.getItem('fc_fx_man_'+(cid||'g')+'_all');
+ const v=LS.getItem('fc_fx_man_'+(cid||'g')+'_'+k)||LS.getItem('fc_fx_man_'+(cid||'g')+'_all');
  const num=n(v);
  return num>0?num:0;
 }
@@ -751,15 +763,15 @@ function setManualFx(val,scope){
  const num=n(val);
  const ym=getActiveYM();
  const key=(scope==='all')?('fc_fx_man_'+(cid||'g')+'_all'):('fc_fx_man_'+(cid||'g')+'_'+ym);
- if(num>0){localStorage.setItem(key,String(num));}
- else{localStorage.removeItem(key);}
+ if(num>0){LS.setItem(key,String(num));}
+ else{LS.removeItem(key);}
  if($('app')&&!$('app').classList.contains('hid'))go(tab);
 }
 function resetManualFx(){
  const ym=getActiveYM();
- localStorage.removeItem('fc_fx_man_'+(cid||'g')+'_'+ym);
- localStorage.removeItem('fc_fx_man_'+(cid||'g')+'_all');
- localStorage.setItem('fc_fx_basis','end');
+ LS.removeItem('fc_fx_man_'+(cid||'g')+'_'+ym);
+ LS.removeItem('fc_fx_man_'+(cid||'g')+'_all');
+ LS.setItem('fc_fx_basis','end');
  if($('app')&&!$('app').classList.contains('hid'))go(tab);
 }
 function getSheetFxForYM(ym,basis){
@@ -781,9 +793,16 @@ function getSheetFxForYM(ym,basis){
     if(mo.last>0)return mo.last;
    }
   }
+  if(keys.length){
+   const lastMo=M.fx.months[keys[keys.length-1]];
+   if(lastMo.last>0)return lastMo.last;
+  }
  }
- // Sana uchun mos yoki undan oldingi kurs topilmasa, boshqa davr kursini taxminan ishlatmaymiz.
- return 0; // Kurs topilmasa konvertatsiyani to'xtatamiz; taxminiy kurs ishlatilmaydi.
+ if(M&&M.sales&&M.sales.items){
+  const r=M.sales.items.find(x=>x.rate>0);
+  if(r)return r.rate;
+ }
+ return 12030;
 }
 function getFxRate(ym){
  const targetYM=ym||getActiveYM();
@@ -799,28 +818,23 @@ function fxSourceLabel(ym){
  if(b==='avg')return "Oy o'rtacha kursi (Курс listi)";
  return "Oy oxiri kursi (Курс listi)";
 }
-function curAmt(v,isUzs,ym){
+function curAmt(v,isUzs){
  const num=n(v);
  if(!num)return 0;
- if(getCurr()==='UZS'){
-  if(isUzs)return num;
-  const rate=getFxRate(ym||getActiveYM());
-  return rate>0?num*rate:null;
- }
+ if(getCurr()==='UZS')return isUzs?num:num*getFxRate(getActiveYM());
  return num;
 }
-function fmtCur(v,withSign,isUzs,ym){
- const num=curAmt(v,isUzs,ym);
- if(num===null)return '<span class=\"neg\">Kurs topilmadi</span>';
+function fmtCur(v,withSign,isUzs){
+ const num=curAmt(v,isUzs);
  if(!num)return '—';
  const c=getCurr();
  const absStr=Math.abs(num).toLocaleString('ru-RU',{maximumFractionDigits:c==='UZS'?0:2});
  const sign=num<0?'-':(withSign&&num>0?'+':'');
  return c==='UZS'?`${sign}${absStr} so'm`:`${sign}$${absStr}`;
 }
-function sgCur(v,isUzs,ym){
- const num=curAmt(v,isUzs,ym);
- return num===null?fmtCur(v,false,isUzs,ym):`<span class="${num<0?'neg':''}">${fmtCur(v,false,isUzs,ym)}</span>`;
+function sgCur(v,isUzs){
+ const num=curAmt(v,isUzs);
+ return `<span class="${num<0?'neg':''}">${fmtCur(v,false,isUzs)}</span>`;
 }
 function openFxModal(){
  const ym=getActiveYM();
@@ -876,21 +890,22 @@ function openFxModal(){
  `);
 }
 function applyTheme(){
- const thm=localStorage.getItem('fc_theme')||'dark';
+ const thm=LS.getItem('fc_theme')||'dark';
  document.body.classList.toggle('light',thm==='light');
  const bl=$('th-light'),bd=$('th-dark');
  if(bl){bl.style.background=thm==='light'?'var(--gold)':'';bl.style.color=thm==='light'?'#17130a':'';}
  if(bd){bd.style.background=thm==='dark'?'var(--gold)':'';bd.style.color=thm==='dark'?'#17130a':'';}
 }
 function setThemePref(t){
- localStorage.setItem('fc_theme',t);
+ LS.setItem('fc_theme',t);
  applyTheme();
+ if($('app')&&!$('app').classList.contains('hid'))go(tab); // grafiklar ranglarini yangilash
 }
 applyTheme();
-function setLangPref(l){localStorage.setItem('fc_lang',l);if($('app')&&!$('app').classList.contains('hid'))go(tab);}
-function setCurrPref(c){localStorage.setItem('fc_curr',c);if($('app')&&!$('app').classList.contains('hid'))go(tab);}
+function setLangPref(l){LS.setItem('fc_lang',l);if($('app')&&!$('app').classList.contains('hid'))go(tab);}
+function setCurrPref(c){LS.setItem('fc_curr',c);if($('app')&&!$('app').classList.contains('hid'))go(tab);}
 function topPrefsBar(){
- const l=localStorage.getItem('fc_lang')||'uz',c=getCurr(),ym=getActiveYM(),fx=getFxRate(ym),isMan=getManualFx(ym)>0;
+ const l=LS.getItem('fc_lang')||'uz',c=getCurr(),ym=getActiveYM(),fx=getFxRate(ym),isMan=getManualFx(ym)>0;
  return `<div class="flex flex-wrap items-center gap-1.5" style="background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px">
   <button type="button" onclick="setLangPref('uz')" class="px-2.5 py-1 rounded text-xs font-semibold ${l==='uz'?'':'mu'}" style="${l==='uz'?'background:var(--gold);color:#17130a':''}">UZ</button>
   <button type="button" onclick="setLangPref('ru')" class="px-2.5 py-1 rounded text-xs font-semibold ${l==='ru'?'':'mu'}" style="${l==='ru'?'background:var(--gold);color:#17130a':''}">RU</button>
@@ -900,23 +915,28 @@ function topPrefsBar(){
   <span style="width:1px;height:16px;background:var(--line)"></span>
   <button type="button" onclick="openFxModal()" class="px-2.5 py-1 rounded text-xs font-semibold flex items-center gap-1.5" style="background:${isMan?'rgba(212,166,58,.18)':'#101613'};color:${isMan?'var(--gold)':'var(--tx)'};border:1px solid ${isMan?'var(--gold)':'var(--line)'}" title="Kursni o'zgartirish yoki kunlik kurslarni ko'rish">
    <i class="fa-solid fa-coins" style="color:var(--gold)"></i>
-   <span>1$ = ${fx>0?fmt(fx):'Kurs yo\'q'}</span>
+   <span>1$ = ${fmt(fx)}</span>
    <i class="fa-solid fa-pen text-[10px] mu"></i>
   </button>
  </div>`;
 }
-function mountTopPrefs(){
+function syncToolbarHeight(){
  const mainTop=document.querySelector('main>div:first-child');
- if(!mainTop)return;
+ if(mainTop)document.documentElement.style.setProperty('--tb',mainTop.offsetHeight+'px');
+}
+function mountTopPrefs(){
+ const rightBox=$('toolbar-right');
+ if(!rightBox)return;
  let slot=$('top-prefs');
  if(!slot){
   slot=document.createElement('div');
   slot.id='top-prefs';
-  const rightBox=mainTop.querySelector('div:last-child');
-  if(rightBox)rightBox.insertBefore(slot,rightBox.firstChild);
+  rightBox.insertBefore(slot,rightBox.firstChild);
  }
  slot.innerHTML=topPrefsBar();
+ syncToolbarHeight();
 }
+window.addEventListener('resize',syncToolbarHeight);
 
 function empty(){return `<div class="panel p-12 text-center space-y-3"><i class="fa-solid fa-file-excel text-3xl" style="color:var(--gold)"></i>
  <div class="text-lg font-medium">Ma'lumot hali yuklanmagan</div><div class="mu">Master Excel faylini yuklang. Barcha bo'limlar shu fayldan to'ldiriladi.</div>
@@ -961,7 +981,6 @@ dash(){
  const selIdx=(window.dashColIdx!=null&&mPool.includes(window.dashColIdx))?window.dashColIdx:defIdx;
  const selLabel=pnlHead[selIdx]||mNames[selIdx]||'Okt';
 
- // 4 ta sotuv yo'nalishi (dublikatsiz, aniq tartibda)
  const saleDirs=[
   {key:'Barchasi',label:'Barchasi',grp:null,srvRe:null},
   {key:'PREP-01',label:'Дробление',grp:'Дробление',srvRe:/^prep[-_]?0?1/i},
@@ -1065,7 +1084,7 @@ dash(){
  const worstMo=monthSeries.length?monthSeries.reduce((b,x)=>(!b||x.rev<b.rev)?x:b,null):null;
  const rangeTxt=monthSeries.length?`${monthSeries[0].lbl} – ${monthSeries[monthSeries.length-1].lbl}`:'—';
 
- const subPrev=prevLabel?`${tr('oldingi oyga nisbatan')} (${esc(tr(prevLabel))})`:tr("oldingi oy ma'lumoti yo'q");
+ const subPrev=prevLabel?`${esc(tr('oldingi oyga nisbatan'))} (${esc(tr(prevLabel))})`:esc(tr("oldingi oy ma'lumoti yo'q"));
  const cLbl=getCurr()==='UZS'?'UZS':'USD';
 
  const filterBar=`<div class="panel p-3.5 mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -1092,9 +1111,11 @@ dash(){
   <div class="text-xs font-semibold mu">▸ ${esc(tr(selLabel))} · ${esc(tr(curDirObj.label))} · ${esc(tr(selMetric))}</div>
  </div>`;
 
+ // DIQQAT: kpi() sarlavha va izohni o'zi esc() qilmaydi — chaqiruvchi tomondan esc() qilingan matn keladi
+ // (oldin ikki marta esc() qilinib, "Ma'muriy" kabi so'zlarda &#39; ko'rinib qolardi)
  const kpi=(title,valHtml,deltaHtml,footTxt,accent)=>`<div class="panel p-3.5 flex flex-col justify-between transition hover:-translate-y-0.5" style="border-bottom:3px solid ${accent};border-radius:10px">
   <div>
-   <div class="text-xs mu mb-1">${esc(title)}</div>
+   <div class="text-xs mu mb-1">${title}</div>
    <div class="text-xl font-bold tracking-tight" style="line-height:1.25">${valHtml}</div>
    <div class="mt-1 min-h-[18px]">${deltaHtml||''}</div>
   </div>
@@ -1113,7 +1134,7 @@ dash(){
 
  const row2=`<div class="grid gap-3 mb-4" style="grid-template-columns:repeat(auto-fit,minmax(175px,1fr))">
   ${kpi(`${esc(tr('Sof foyda'))} (${cLbl})`,fmtCur(curNet),fmtDelta(pctChg(curNet,prevNet),false),`${esc(tr(selDir==='Barchasi'?"barcha yo'nalishlar":curDirObj.label))}, ${esc(tr(selLabel))}`,'#3b82f6')}
-  ${kpi(`${esc(tr("Ma'muriy xarajat"))} (${cLbl})`,fmtCur(curAdmin),'','P&L: Административные расходы','#fb7185')}
+  ${kpi(`${esc(tr("Ma'muriy xarajat"))} (${cLbl})`,fmtCur(curAdmin),'','P&amp;L: Административные расходы','#fb7185')}
   ${kpi(esc(tr('Sof marja')),`${netMargin.toFixed(1).replace('.',',')}%`,'',esc(tr('sof foyda / jami daromad')),'#10b981')}
   ${kpi(esc(tr("O'rtacha oylik daromad")),fmtCur(avgRev),'',esc(tr("faol oylar bo'yicha")),'#a855f7')}
   ${kpi(esc(tr('Eng yuqori oy')),bestMo?esc(tr(bestMo.lbl)):'—','',bestMo?fmtCur(bestMo.rev):'','#06b6d4')}
@@ -1297,7 +1318,7 @@ dtkt(){
  const mode=window.dtktMode||'panel',nz=window.dtktNz||'nz';
  window.dtktClosed=window.dtktClosed||{};
  window.dtktCats=window.dtktCats||{};
- const man=debts.map(d=>`<tr><td style="position:sticky;left:0;min-width:250px;background:var(--panel)">${esc(tr(d.name))} <span class="mu text-xs">(qo'lda)</span></td><td class="mu">${esc(d.sap_code||'-')}</td><td><span class="px-2 py-0.5 rounded text-xs mu" style="background:#1d2823">Qo'lda</span></td><td class="num">—</td><td class="num pos">${d.type==='DEBTOR'?fmtCur(d.amount):'—'}</td><td class="num neg">${d.type==='CREDITOR'?fmtCur(d.amount):'—'}</td><td class="num">—</td><td class="num font-semibold">${d.type==='DEBTOR'?fmtCur(d.amount,true):fmtCur(-Math.abs(n(d.amount)))} <button class="neg ml-2 text-xs" onclick="delDebt('${esc(d.id)}')">×</button></td></tr>`).join('');
+ const man=debts.map(d=>`<tr><td style="position:sticky;left:0;min-width:250px;background:var(--panel)">${esc(tr(d.name))} <span class="mu text-xs">(qo'lda)</span></td><td class="mu">${esc(d.sap_code||'-')}</td><td><span class="px-2 py-0.5 rounded text-xs mu" style="background:#1d2823">Qo'lda</span></td><td class="num">—</td><td class="num pos">${d.type==='DEBTOR'?fmtCur(d.amount):'—'}</td><td class="num neg">${d.type==='CREDITOR'?fmtCur(d.amount):'—'}</td><td class="num">—</td><td class="num font-semibold">${d.type==='DEBTOR'?fmtCur(d.amount,true):fmtCur(-Math.abs(n(d.amount)))} <button class="neg ml-2 text-xs" onclick="delDebt('${esc(d.id)}')" aria-label="O'chirish">×</button></td></tr>`).join('');
  if(!M||!M.dtkt||!M.dtkt.length||!cols.length){
   return `<div class="mb-3"><button class="btn" onclick="debtModal()">+ Qarz qo'shish</button></div>`+(man?table(th('Kontragent')+th('SAP kod')+th('Tur')+th("Boshlang'ich",1)+th('Debitor (Дт)',1)+th('Kreditor (Кт)',1)+th("O'zgarish",1)+th('Yakuniy',1),man,'text-sm'):empty());
  }
@@ -1537,22 +1558,31 @@ bs(){
 
 pnl(){
  if(!M||!M.pnl||!M.pnl.rows||!M.pnl.rows.length)return empty();
- const mode=window.pnlMode||'all',mi=window.pnlMonth!=null?window.pnlMonth:-1;
- const showPct=(window.pnlPct!==false);
  const heads=M.pnl.head||[];
  const mHeads=heads.slice(0,-1),totLbl=heads[heads.length-1]||'Jami';
- const cal=monthCal(2026,mi,[2026],"(y,m)=>{window.pnlMonth=m;if(m===-1)window.pnlMode='all';document.querySelector('.nav.on').click()}",[-1,'Barcha oylar']);
- const tabs=[['all','Oyma-oy jadval'],['one',"Tanlangan oy"]].map(([k,lbl])=>`<button type="button" class="${mode===k?'btn':'btn2'}" onclick="window.pnlMode='${k}';document.querySelector('.nav.on').click()">${esc(tr(lbl))}</button>`).join('');
- const pctBtn=`<button type="button" class="${showPct?'btn':'btn2'}" onclick="window.pnlPct=!window.pnlPct;document.querySelector('.nav.on').click()"><i class="fa-solid fa-percent"></i><span>% Ulushi</span></button>`;
+ // Har bir ustun sarlavhasidan kalendar oy raqamini aniqlaymiz (oldin tanlangan oy indeksi
+ // ustun indeksiga to'g'ridan-to'g'ri tenglashtirilgan edi, P&L esa Aprel'dan boshlanadi — natija noto'g'ri chiqardi)
+ const hMon=mHeads.map(h=>parseYM(h,2026).m);
+ const lastMon=hMon.filter(Boolean).slice(-1)[0]||10;
+ const mode=window.pnlMode||'all';
+ const mi=window.pnlMonth!=null?window.pnlMonth:-1;
+ const showPct=(window.pnlPct!==false);
+ const cal=monthCal(2026,mi,[2026],"(y,m)=>{window.pnlMonth=m;window.pnlMode=(m===-1)?'all':'one';document.querySelector('.nav.on').click()}",[-1,'Barcha oylar']);
+ const tabs=[['all','Oyma-oy jadval'],['one',"Tanlangan oy"]].map(([k,lbl])=>`<button type="button" class="${mode===k?'btn':'btn2'}" onclick="window.pnlMode='${k}';${k==='one'?`if(window.pnlMonth==null||window.pnlMonth<0)window.pnlMonth=${lastMon-1};`:''}document.querySelector('.nav.on').click()">${esc(tr(lbl))}</button>`).join('');
+ const pctBtn=`<button type="button" class="${showPct?'btn':'btn2'}" onclick="window.pnlPct=${!showPct};document.querySelector('.nav.on').click()"><i class="fa-solid fa-percent"></i><span>% Ulushi</span></button>`;
  const nav=`<div class="sub-bar flex flex-wrap items-center justify-between gap-2 mb-2"><div class="flex flex-wrap items-center gap-2"><span class="font-semibold text-base">${esc(tr('Foyda va zarar'))}</span>${cal}</div><div class="flex gap-1.5">${tabs}${pctBtn}</div></div>`;
+
+ const mIdx=(mode==='one'&&mi>=0)?hMon.indexOf(mi+1):-1;
+ if(mode==='one'&&mi>=0&&mIdx<0){
+  return nav+`<div class="panel p-8 text-center mu">${esc(M_FULL[mi]||'')} oyi uchun P&amp;L ma'lumoti yo'q. Mavjud oylar: ${esc(mHeads.join(', '))}</div>`;
+ }
 
  const revRow=M.pnl.rows.find(r=>/чистая выручка|выручка от реализац|жами даромад|даромад/i.test(String(r.name||'')));
  const revArr=revRow?(revRow.v||[]):[];
  const isMain=s=>/^(чистая выручка|себестоимость|расходы периода|расходы по финансовой|налоги$|долг\/предоплата|жами даромад|жами таннарх|маржа|йўл киро|жами харажатлар|накладной харажат)/i.test(s);
  const isSub=s=>/^(валовая прибыль|прибыль \(убыток\) от основной|прибыль \(убыток\) до уплаты|чистая прибыль|маржа$)/i.test(s);
- const mIdx=mi>=0?Math.min(mi,mHeads.length-1):-1;
 
- const pctRow=(arr,colIdx,isHeaderSub=false)=>{
+ const pctRow=(arr,isHeaderSub=false)=>{
   const txtCell=(v,i)=>{
    const b=n(revArr[i]||0);
    const p=b?(Math.abs(n(v))/Math.abs(b))*100:0;
@@ -1568,11 +1598,11 @@ pnl(){
  const outRows=[];
  M.pnl.rows.forEach(p=>{
   const nm=String(p.name||'').trim();
-  const sub=isSub(nm),main=isMain(nm),net=/^чистая прибыль/i.test(nm);
-  const cls=net?'sub':sub?'sub':main?'font-semibold':'';
+  const sub=isSub(nm),main=isMain(nm),netR=/^чистая прибыль/i.test(nm);
+  const cls=netR?'sub':sub?'sub':main?'font-semibold':'';
   const pad=(!sub&&!main)?'padding-left:28px;color:var(--mu)':'';
-  const bg=net?'background:#13261b;color:var(--pos)':'';
-  const td0=`<td style="position:sticky;left:0;min-width:270px;background:${net?'#13261b':sub?'#101813':'var(--panel)'};border-right:1px solid var(--line);${pad}">${esc(tr(nm))}</td>`;
+  const bg=netR?'background:#13261b;color:var(--pos)':'';
+  const td0=`<td style="position:sticky;left:0;min-width:270px;background:${netR?'#13261b':sub?'#101813':'var(--panel)'};border-right:1px solid var(--line);${pad}">${esc(tr(nm))}</td>`;
   if(mode==='one'&&mIdx>=0){
    const val=n(p.v[mIdx]||0),totV=n(p.v[p.v.length-1]||0);
    outRows.push(`<tr class="${cls}" style="${bg}">${td0}<td class="num font-semibold">${fmtCur(val)}</td><td class="num mu">${fmtCur(totV)}</td></tr>`);
@@ -1580,7 +1610,7 @@ pnl(){
    outRows.push(`<tr class="${cls}" style="${bg}">${td0}${p.v.map((v,i)=>`<td class="num ${i===p.v.length-1?'font-semibold':''}">${fmtCur(n(v))}</td>`).join('')}</tr>`);
   }
   if(showPct&&/себестоимость|жами таннарх|^маржа$|накладной харажат|расходы периода|расходы по финансовой|чистая прибыль/i.test(nm)){
-   outRows.push(pctRow(p.v,mIdx>=0?mIdx:0,/^маржа$/i.test(nm)));
+   outRows.push(pctRow(p.v,/^маржа$/i.test(nm)));
   }
  });
 
@@ -1619,7 +1649,7 @@ inv(){
   ['o','Chiqim (Spisaniya)'],
   ['e','Yakuniy qoldiq']
  ];
- const selMode=`<select class="inp text-sm font-medium" style="width:auto;min-width:230px;padding:7px 12px;border:1px solid var(--gold);cursor:pointer" onchange="window.invMode=this.value;if(this.value==='oyma')window.invMonth=-1;else if(window.invMonth===-1)window.invMonth=${lastMo.m-1};document.querySelector('.nav.on').click()">${opts.map(([k,lbl])=>`<option value="${k}" ${mode===k?'selected':''}>${esc(tr(lbl))}</option>`).join('')}</select>`;
+ const selMode=`<select class="inp text-sm font-medium" style="width:auto;min-width:230px;padding:7px 12px;border:1px solid var(--gold);cursor:pointer" onchange="window.invMode=this.value;if(this.value==='oyma')window.invMonth=-1;else if(window.invMonth==null||window.invMonth===-1)window.invMonth=${lastMo.m-1};document.querySelector('.nav.on').click()">${opts.map(([k,lbl])=>`<option value="${k}" ${mode===k?'selected':''}>${esc(tr(lbl))}</option>`).join('')}</select>`;
  const nav=`<div class="sub-bar flex flex-wrap items-center justify-between gap-2 mb-2"><div class="flex flex-wrap items-center gap-2"><span class="font-semibold text-base">${esc(tr('Ombor'))}</span>${cal}${selMode}</div><span class="px-2 py-0.5 rounded text-xs mu" style="background:#101613;border:1px solid var(--line)">${esc(mode==='oyma'?('Barcha oylar '+curY):selYM)} • ${getCurr()}</span></div>`;
 
  if(mode==='one'&&M&&M.invOyma&&M.invOyma.items&&M.invOyma.items.length){
@@ -1723,9 +1753,14 @@ inv(){
   <td class="num">${fmt(eQ)}</td><td class="num">—</td><td class="num">${fmtCur(eS,false,true)}</td></tr>`;
  return nav+table(head,body+tot,'text-xs pnl-tbl inv-tbl');
 }
-};// ============ GRAFIKLAR ============
+};
+
+// ============ GRAFIKLAR ============
 function drawCharts(){
- Chart.defaults.color='#8a9a92';Chart.defaults.borderColor='#24302a';Chart.defaults.font.family="'IBM Plex Sans'";
+ const light=document.body.classList.contains('light');
+ Chart.defaults.color=light?'#5c6b64':'#8a9a92';
+ Chart.defaults.borderColor=light?'#d5ddd9':'#24302a';
+ Chart.defaults.font.family="'IBM Plex Sans'";
  if(!M)return;
  const pnlRows=(M.pnl&&M.pnl.rows)||[];
  const pnlHead=(M.pnl&&M.pnl.head)||[];
@@ -1807,7 +1842,7 @@ function drawCharts(){
  }
 
  if($('c2')){
-  const dLabels=saleDirs.map(d=>d.label);
+  const dLabels=saleDirs.map(d=>tr(d.label));
   const dVals=saleDirs.map(d=>{
    if(d.srvRe){
     const subR=pnlRows.find(r=>d.srvRe.test(String(r.name||'').trim()));
@@ -1818,7 +1853,7 @@ function drawCharts(){
   if(dVals.some(Boolean)){
    charts.c2=new Chart($('c2'),{
     type:'doughnut',
-    data:{labels:dLabels,datasets:[{data:dVals,backgroundColor:['#d4a63a','#4ade80','#60a5fa','#a855f7'],borderColor:'#141c18'}]},
+    data:{labels:dLabels,datasets:[{data:dVals,backgroundColor:['#d4a63a','#4ade80','#60a5fa','#a855f7'],borderColor:light?'#ffffff':'#141c18'}]},
     options:{plugins:{legend:{position:'bottom'}}}
    });
   }
@@ -1842,33 +1877,24 @@ function drawCharts(){
 
 // ============ QIDIRUV VA EKSPORT ============
 function filterRows(){const q=$('q').value.toLowerCase();document.querySelectorAll('#tb tr').forEach(r=>r.classList.toggle('hid',q&&!r.textContent.toLowerCase().includes(q)))}
-function exportTab(){
- const tables=[...document.querySelectorAll('#view table')].filter(t=>t.querySelector('tbody tr'));
- if(!tables.length){alert("Bu bo'limda eksport qilinadigan jadval yo'q");return}
- const wb=XLSX.utils.book_new();
- tables.forEach((t,i)=>{
-  const ws=XLSX.utils.table_to_sheet(t,{raw:true});
-  let name=t.getAttribute('data-export-name')||`Jadval_${i+1}`;
-  name=String(name).replace(/[\\/?*\[\]:]/g,' ').slice(0,31)||`Jadval_${i+1}`;
-  if(wb.SheetNames.includes(name))name=`${name.slice(0,25)}_${i+1}`;
-  XLSX.utils.book_append_sheet(wb,ws,name);
- });
- XLSX.writeFile(wb,`fincontrol_${tab}.xlsx`);
-}
+function exportTab(){const t=document.querySelector('#view table');if(!t){alert("Bu bo'limda eksport qilinadigan jadval yo'q");return}XLSX.writeFile(XLSX.utils.table_to_book(t),'fincontrol_'+tab+'.xlsx')}
 
 // ============ MODALLAR VA BAZA ============
-function dtktDetail(idx){const d=M&&M.dtkt&&M.dtkt[idx];if(!d)return;const cols=(M.dtktCols&&M.dtktCols.length)?M.dtktCols:M.dtktMonths.map((l,i)=>({y:2026,m:i+1,label:l}));const dy=window.dtktYear!=null?window.dtktYear:(cols.length?cols[cols.length-1].y:2026);const yIdx=Array.from({length:12},(_,m0)=>cols.findIndex(c=>c.y===dy&&c.m===(m0+1)));const prevDec=cols.findIndex(c=>c.y===(dy-1)&&c.m===12);const getD=(arr,ci)=>ci>=0?(arr[ci]||0):0;const rows=M_FULL.map((m,i)=>{const ci=yIdx[i],pci=i>0?yIdx[i-1]:prevDec;const dv=getD(d.dt,ci),kv=getD(d.kt,ci),nv=dv-kv,pN=getD(d.dt,pci)-getD(d.kt,pci),chg=nv-pN;return `<tr><td>${m} ${dy}</td><td class="num pos">${dv?'$'+fmt(dv):'—'}</td><td class="num neg">${kv?'$'+fmt(kv):'—'}</td><td class="num font-semibold ${nv>0?'pos':nv<0?'neg':'mu'}">${nv?'$'+sg(nv):'—'}</td><td class="num text-xs ${chg>0?'pos':chg<0?'neg':'mu'}">${chg?(chg>0?'+':'')+'$'+fmt(chg):'—'}</td></tr>`}).join('');openModal(`<div class="flex items-center justify-between"><div><h3 class="font-semibold text-lg">${esc(tr(d.name))}</h3><div class="mu text-xs">SAP code: ${esc(d.sap)} • ${dy}-yil</div></div><button class="btn2" onclick="closeModal()">Yopish</button></div><div class="overflow-y-auto" style="max-height:60vh"><table class="w-full text-sm"><thead><tr><th>Oy</th><th class="num">Debitor (Дт)</th><th class="num">Kreditor (Кт)</th><th class="num">Sof qoldiq</th><th class="num">O'zgarish</th></tr></thead><tbody>${rows}</tbody></table></div>`);$('modal-body').style.maxWidth='680px'}
+function dtktDetail(idx){const d=M&&M.dtkt&&M.dtkt[idx];if(!d)return;const cols=(M.dtktCols&&M.dtktCols.length)?M.dtktCols:M.dtktMonths.map((l,i)=>({y:2026,m:i+1,label:l}));const dy=window.dtktYear!=null?window.dtktYear:(cols.length?cols[cols.length-1].y:2026);const yIdx=Array.from({length:12},(_,m0)=>cols.findIndex(c=>c.y===dy&&c.m===(m0+1)));const prevDec=cols.findIndex(c=>c.y===(dy-1)&&c.m===12);const getD=(arr,ci)=>ci>=0?(arr[ci]||0):0;const rows=M_FULL.map((m,i)=>{const ci=yIdx[i],pci=i>0?yIdx[i-1]:prevDec;const dv=getD(d.dt,ci),kv=getD(d.kt,ci),nv=dv-kv,pN=getD(d.dt,pci)-getD(d.kt,pci),chg=nv-pN;return `<tr><td>${m} ${dy}</td><td class="num pos">${dv?fmtCur(dv):'—'}</td><td class="num neg">${kv?fmtCur(kv):'—'}</td><td class="num font-semibold ${nv>0?'pos':nv<0?'neg':'mu'}">${nv?sgCur(nv):'—'}</td><td class="num text-xs ${chg>0?'pos':chg<0?'neg':'mu'}">${chg?fmtCur(chg,true):'—'}</td></tr>`}).join('');openModal(`<div class="flex items-center justify-between"><div><h3 class="font-semibold text-lg">${esc(tr(d.name))}</h3><div class="mu text-xs">SAP code: ${esc(d.sap)} • ${dy}-yil</div></div><button class="btn2" onclick="closeModal()">Yopish</button></div><div class="overflow-y-auto" style="max-height:60vh"><table class="w-full text-sm"><thead><tr><th>Oy</th><th class="num">Debitor (Дт)</th><th class="num">Kreditor (Кт)</th><th class="num">Sof qoldiq</th><th class="num">O'zgarish</th></tr></thead><tbody>${rows}</tbody></table></div>`);$('modal-body').style.maxWidth='680px'}
 function toggleCat(idx,v){const g=M&&M.dtkt&&M.dtkt[idx];if(!g)return;window.dtktCats[g.name]=v;document.querySelector('.nav.on').click()}
 function closeModal(){$('modal-body').style.maxWidth='';$('modal').classList.add('hid')}
 function openModal(h){$('modal-body').innerHTML=h;$('modal').classList.remove('hid')}
+// Modalni Esc yoki fon ustiga bosib yopish
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('modal').classList.contains('hid'))closeModal()});
+$('modal').addEventListener('mousedown',e=>{if(e.target===$('modal'))closeModal()});
 const f=(id,ph,t)=>`<input id="${id}" type="${t||'text'}" placeholder="${ph}" class="inp">`;
 const foot=(fn)=>`<div class="flex justify-end gap-2"><button class="btn2" onclick="closeModal()">Bekor qilish</button><button class="btn" onclick="${fn}">Saqlash</button></div>`;
 function txModal(){openModal(`<h3 class="font-semibold text-lg">Qoldiq qo'shish</h3>${f('m-date','','date')}${f('m-acc','Hisob nomi (masalan: Kassa)')}${f('m-cat','SAP kod')}<select id="m-type" class="inp"><option value="IN">Aktiv (musbat)</option><option value="OUT">Majburiyat (manfiy)</option></select>${f('m-amt','Summa (UZS)','number')}${foot('saveTx()')}`)}
 async function saveTx(){const e=(await sb.from('transactions').insert([{company_id:cid,date:$('m-date').value||new Date().toISOString().slice(0,10),account_name:$('m-acc').value||'Qoldiq',type:$('m-type').value,category:$('m-cat').value||'Qoldiq',counterparty:'-',amount:n($('m-amt').value)}])).error;if(e)return alert('Xatolik: '+e.message);closeModal();loadCompany()}
 async function clearTx(){if(!confirm("Qo'lda kiritilgan barcha qoldiqlar o'chiriladi. Davom etasizmi?"))return;const e=(await sb.from('transactions').delete().eq('company_id',cid)).error;if(e)return alert('Xatolik: '+e.message);loadCompany()}
-function debtModal(){openModal(`<h3 class="font-semibold text-lg">Qarz qo'shish</h3>${f('d-name','Kontragent nomi')}${f('d-sap','SAP kod')}<select id="d-type" class="inp"><option value="DEBTOR">Debitor (bizga qarz)</option><option value="CREDITOR">Kreditor (bizning qarz)</option></select>${f('d-amt','Summa','number')}${f('d-due','','date')}${foot('saveDebt()')}`)}
+function debtModal(){openModal(`<h3 class="font-semibold text-lg">Qarz qo'shish</h3>${f('d-name','Kontragent nomi')}${f('d-sap','SAP kod')}<select id="d-type" class="inp"><option value="DEBTOR">Debitor (bizga qarz)</option><option value="CREDITOR">Kreditor (bizning qarz)</option></select>${f('d-amt','Summa (USD)','number')}${f('d-due','','date')}${foot('saveDebt()')}`)}
 async function saveDebt(){if(!$('d-name').value)return alert('Kontragent nomini kiriting');const e=(await sb.from('counterparties_debt').insert([{company_id:cid,name:$('d-name').value,sap_code:$('d-sap').value,type:$('d-type').value,amount:n($('d-amt').value),due_date:$('d-due').value||null}])).error;if(e)return alert('Xatolik: '+e.message);closeModal();loadCompany()}
-async function delDebt(id){if(!confirm("Bu qarz o'chirilsinmi?"))return;const {error}=await sb.from('counterparties_debt').delete().eq('id',id);if(error)return alert('Qarzni o\'chirishda xatolik: '+error.message);await loadCompany()}
+async function delDebt(id){if(!confirm("Bu qarz o'chirilsinmi?"))return;const e=(await sb.from('counterparties_debt').delete().eq('id',id)).error;if(e)return alert('Xatolik: '+e.message);loadCompany()}
 function newCompany(){openModal(`<h3 class="font-semibold text-lg">Yangi kompaniya</h3>${f('c-name','Kompaniya nomi')}${foot('saveCompany()')}`)}
 async function saveCompany(){const v=$('c-name').value.trim();if(!v)return alert('Nomni kiriting');const e=(await sb.from('companies').insert([{name:v,user_id:user.id}])).error;if(e)return alert('Xatolik: '+e.message);closeModal();loadCompanies(cid)}
 async function renameCompany(){const c=companies.find(x=>String(x.id)===String(cid));const v=prompt('Yangi nom:',c?c.name:'');if(!v||!v.trim())return;const e=(await sb.from('companies').update({name:v.trim()}).eq('id',cid)).error;if(e)return alert('Xatolik: '+e.message);loadCompanies(cid)}
