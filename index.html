@@ -144,6 +144,7 @@ const BASE={
  pnl:{sheet:'P&L',skip:5,name:1,cols:[6,7,8,9,10,11,12,13,14,15],head:['Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek','Jami']},
  inv:{sheet:'Inventory',skip:5,sap:1,name:2,qty:5,p:6,su:8,sz:9,inq:10}
 };
+// DIQQAT: GR va RG uchun mustaqil ustun xaritalari berilmagan. Hozircha ikkisi ham BASE shablonidan foydalanadi.
 const PROFILES={golden_result:{label:'GR (standart mapping)',map:BASE},rock_geo:{label:'RG (standart mapping — tekshirilmagan)',map:JSON.parse(JSON.stringify(BASE))}};
 
 const DTKT_GROUPS=['Реализация (mijozlar)','Поставщики местный','Поставщики импорт','Прочее','Intercompany','Налоги'];
@@ -151,8 +152,9 @@ const TABS=[['dash','Boshqaruv paneli','chart-line'],['bs','Balans','scale-balan
 const M_FULL=['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
 const M_SHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const $=id=>document.getElementById(id);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&','<':'<','>':'>','"':'"',"'":'''}[c]));
-// Sonlarni Excel/Google Sheets formatlaridan xavfsiz o'qish
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// Sonlarni Excel/Google Sheets formatlaridan xavfsiz o'qish:
+// 1 234,56 | 1.234,56 | 1,234.56 | 1234.56 | (1 234,56)
 const n=v=>{
  if(v===null||v===undefined||v==='')return 0;
  if(typeof v==='number')return Number.isFinite(v)?v:0;
@@ -165,7 +167,7 @@ const n=v=>{
  const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.');
  if(comma>=0&&dot>=0){
   const dec=comma>dot?',':'.';
-  s=s.replace(dec===','?/\./g:/,/g,'').replace(dec,'.');
+  s=s.replace(dec===' '?/x^/:dec===','?/\./g:/,/g,'').replace(dec===' '?/x^/:dec===','?',':'.');
  }else if(comma>=0||dot>=0){
   const sep=comma>=0?',':'.';
   const parts=s.split(sep);
@@ -259,7 +261,7 @@ function go(t){tab=t;$('q').value='';
  [['lbl-sub','Boshqaruv hisobi'],['lbl-company','Kompaniya'],['lbl-profile','Excel shabloni'],['lbl-upload','Master Excel yuklash']]
   .forEach(([id,txt])=>{const el=$(id);if(el)el.textContent=tr(txt);});
  applyTheme();
- mountTopPrefs();
+mountTopPrefs();
  Object.values(charts).forEach(c=>c&&c.destroy());charts={};
  try{$('view').innerHTML=(R[t]||(()=>''))();if(t==='dash')drawCharts();}
  catch(err){console.error(err);$('view').innerHTML=`<div class="panel p-6 neg">Xatolik: ${esc(err.message)}. Master Excel faylini qayta yuklang.</div>`;}
@@ -470,6 +472,7 @@ function monthCal(selY,selM,years,onPick,extra){
 document.addEventListener('click',()=>document.querySelectorAll('.cal-pop').forEach(x=>x.classList.add('hid')));
 
 const LANG_MAP={
+ // --- Boshqaruv paneli & filtrlar ---
  'Boshqaruv paneli':'Панель управления',
  'Boshqaruv hisobi':'Управленческий учет',
  'Kompaniya':'Компания',
@@ -506,12 +509,15 @@ const LANG_MAP={
  "Oylar bo'yicha dinamika":'Динамика по месяцам',
  "Yo'nalishlar / tarkib ulushi":'Доля направлений / структуры',
  'Tushum, yalpi foyda va sof foyda dinamikasi':'Динамика выручки, валовой и чистой прибыли',
+ 'Yalpi foyda':'Валовая прибыль',
  'Tushum':'Выручка',
  'годовой итог':'Годовой итог',
  'ГОДОВОЙ ИТОГ':'ГОДОВОЙ ИТОГ',
  "oldingi oy ma'lumoti yo'q":'нет данных за прошлый месяц',
  "barcha yo'nalishlar":'все направления',
  'oy':'мес.',
+
+ // --- Balans, P&L, Tannarx, Sotuvlar, Qarzlar, Ombor, Bank ---
  'Balans':'Баланс',
  'Foyda va zarar':'Отчет о прибылях и убытках',
  'Tannarx':'Себестоимость',
@@ -591,6 +597,8 @@ const LANG_MAP={
  'Summa (UZS)':'Сумма (UZS)',
  'Kirim':'Приход',
  "Pul qoldig'i":'Остаток средств',
+ 'Tushum':'Выручка',
+ 'Sof foyda':'Чистая прибыль',
  'Debitorlar':'Дебиторы',
  'Kreditorlar':'Кредиторы',
  'Sotuvlar dinamikasi':'Динамика продаж',
@@ -621,6 +629,7 @@ const _UZ_TO_RU=(()=>{
  Object.entries(LANG_MAP).forEach(([uz,ru])=>{
   if(uz&&ru&&uz!==ru&&!m[ru])m[ru]=uz;
  });
+ // Qo'shimcha aniq o'zbekcha tarjimalar
  Object.assign(m,{
   'Панель управления':'Boshqaruv paneli',
   'Управленческий учет':'Boshqaruv hisobi',
@@ -678,6 +687,7 @@ function tr(s){
   });
   return out;
  }
+ // lang === 'uz'
  if(_UZ_TO_RU[raw])return _UZ_TO_RU[raw];
  let out=raw
   .replace(/по сравнению с прошлым месяцем \(([^)]+)\)/gi,(_,p)=>`oldingi oyga nisbatan (${p})`)
@@ -772,7 +782,8 @@ function getSheetFxForYM(ym,basis){
    }
   }
  }
- return 0;
+ // Sana uchun mos yoki undan oldingi kurs topilmasa, boshqa davr kursini taxminan ishlatmaymiz.
+ return 0; // Kurs topilmasa konvertatsiyani to'xtatamiz; taxminiy kurs ishlatilmaydi.
 }
 function getFxRate(ym){
  const targetYM=ym||getActiveYM();
@@ -800,7 +811,7 @@ function curAmt(v,isUzs,ym){
 }
 function fmtCur(v,withSign,isUzs,ym){
  const num=curAmt(v,isUzs,ym);
- if(num===null)return '<span class="neg">Kurs topilmadi</span>';
+ if(num===null)return '<span class=\"neg\">Kurs topilmadi</span>';
  if(!num)return '—';
  const c=getCurr();
  const absStr=Math.abs(num).toLocaleString('ru-RU',{maximumFractionDigits:c==='UZS'?0:2});
@@ -950,6 +961,7 @@ dash(){
  const selIdx=(window.dashColIdx!=null&&mPool.includes(window.dashColIdx))?window.dashColIdx:defIdx;
  const selLabel=pnlHead[selIdx]||mNames[selIdx]||'Okt';
 
+ // 4 ta sotuv yo'nalishi (dublikatsiz, aniq tartibda)
  const saleDirs=[
   {key:'Barchasi',label:'Barchasi',grp:null,srvRe:null},
   {key:'PREP-01',label:'Дробление',grp:'Дробление',srvRe:/^prep[-_]?0?1/i},
@@ -1711,9 +1723,7 @@ inv(){
   <td class="num">${fmt(eQ)}</td><td class="num">—</td><td class="num">${fmtCur(eS,false,true)}</td></tr>`;
  return nav+table(head,body+tot,'text-xs pnl-tbl inv-tbl');
 }
-};
-
-// ============ GRAFIKLAR ============
+};// ============ GRAFIKLAR ============
 function drawCharts(){
  Chart.defaults.color='#8a9a92';Chart.defaults.borderColor='#24302a';Chart.defaults.font.family="'IBM Plex Sans'";
  if(!M)return;
